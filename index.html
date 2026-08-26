@@ -719,8 +719,7 @@
                 alert('✅ Firebase 설정이 저장되었습니다! 페이지를 새로고침하여 연결합니다.');
                 location.reload();
             } catch (e) {
-                alert('⚠️ 유효한 JSON/JavaScript 객체 형태가 아닙니다.
-Firebase 콘솔의 firebaseConfig 코드를 올바르게 입력해주세요.');
+                alert('⚠️ 유효한 JSON/JavaScript 객체 형태가 아닙니다.\nFirebase 콘솔의 firebaseConfig 코드를 올바르게 입력해주세요.');
             }
         }
 
@@ -753,8 +752,7 @@ Firebase 콘솔의 firebaseConfig 코드를 올바르게 입력해주세요.');
                 closeFirebaseConfigModal();
             } catch (err) {
                 console.error(err);
-                alert('업로드 실패: ' + err.message + '
-(Firebase 콘솔에서 Firestore 보안 규칙을 읽기/쓰기 허용으로 설정했는지 확인하세요.)');
+                alert('업로드 실패: ' + err.message + '\n(Firebase 콘솔에서 Firestore 보안 규칙을 읽기/쓰기 허용으로 설정했는지 확인하세요.)');
             } finally {
                 btn.innerHTML = '<i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> 초기 데이터(193건) 클라우드 업로드';
                 btn.disabled = false;
@@ -1395,8 +1393,7 @@ Firebase 콘솔의 firebaseConfig 코드를 올바르게 입력해주세요.');
                     return;
                 } catch (err) {
                     console.error('Firebase save error:', err);
-                    alert('클라우드 저장 실패: ' + err.message + '
-(로컬에 저장합니다.)');
+                    alert('클라우드 저장 실패: ' + err.message + '\n(로컬에 저장합니다.)');
                 }
             }
 
@@ -1468,8 +1465,7 @@ Firebase 콘솔의 firebaseConfig 코드를 올바르게 입력해주세요.');
 
         // ================= EXCEL EXPORTS & IMPORTS =================
         function triggerDataImport() {
-            const confirmImport = confirm("⚠️ 엑셀 데이터를 불러오면 현재 데이터가 엑셀 데이터로 교체/복구됩니다.
-계속 진행하시겠습니까?");
+            const confirmImport = confirm("⚠️ 엑셀 데이터를 불러오면 현재 데이터가 엑셀 데이터로 교체/복구됩니다.\n계속 진행하시겠습니까?");
             if (confirmImport) {
                 document.getElementById('excel-file-input').click();
             }
