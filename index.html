@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>최강1팀 공동모집 업적관리포탈</title>
+    <title>최강1팀 공동모집 업적관리포탈 (Firebase 클라우드)</title>
     <!-- PWA & Mobile App Icon Settings -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
@@ -20,6 +20,9 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase Compat SDKs (App & Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
         body {
@@ -54,15 +57,22 @@
                         <i data-lucide="pie-chart" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </div>
                     <div class="min-w-0">
-                        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white truncate">
-                            최강1팀 공동모집 업적관리포탈
-                        </h1>
-                        <p class="text-[11px] text-slate-400 truncate">팀원 공동업적 기여율 조회 시스템</p>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white truncate">
+                                최강1팀 공동모집 업적관리포탈
+                            </h1>
+                            <!-- Cloud Sync Status Badge -->
+                            <span id="cloud-status-badge" onclick="openFirebaseConfigModal()" class="cursor-pointer px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1 hover:border-blue-400 transition" title="클라우드 동기화 상태 (클릭하여 설정)">
+                                <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse" id="cloud-status-dot"></span>
+                                <span id="cloud-status-text">로컬 저장소</span>
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 truncate">팀원 공동업적 기여율 실시간 클라우드 시스템</p>
                     </div>
                 </div>
 
                 <!-- Navigation Tabs (Mobile Scrollable) -->
-                <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 md:pb-0 custom-scrollbar flex-shrink-0">
+                <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 md:pb-0 custom-scrollbar flex-shrink-0 items-center">
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium bg-blue-600 text-white flex items-center gap-1.5 whitespace-nowrap transition shadow-sm">
                         <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         <span>대시보드</span>
@@ -125,7 +135,10 @@
                         <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 전체 엑셀 내보내기
                     </button>
                     <button onclick="triggerDataImport()" class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition" title="엑셀 파일로 기존 데이터를 복구/불러오기">
-                        <i data-lucide="upload" class="w-3.5 h-3.5"></i> 데이타 불러오기
+                        <i data-lucide="upload" class="w-3.5 h-3.5"></i> 엑셀 불러오기
+                    </button>
+                    <button onclick="openFirebaseConfigModal()" class="inline-flex items-center gap-1 bg-slate-800 hover:bg-slate-900 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition border border-slate-700" title="Firebase 클라우드 연동 키 설정">
+                        <i data-lucide="cloud-cog" class="w-3.5 h-3.5 text-blue-400"></i> 클라우드 설정
                     </button>
                 </div>
             </div>
@@ -335,7 +348,7 @@
                         <h4 id="mem-kpi-count" class="text-xl sm:text-2xl font-bold text-slate-800 mt-1">0 건</h4>
                     </div>
 
-                    <!-- 팀원 배분 환산액 / 계약 총 환산액 (파란색 / 검정색 구분) -->
+                    <!-- 팀원 배분 환산액 / 계약 총 환산액 -->
                     <div class="bg-blue-50/40 p-3.5 sm:p-4 rounded-xl border border-blue-200">
                         <div class="text-xs font-semibold flex items-center gap-1 flex-wrap">
                             <span class="text-blue-600 font-bold">팀원 배분 환산액</span>
@@ -395,7 +408,6 @@
     <!-- ================= MODAL: ADD / EDIT CONTRACT ================= -->
     <div id="contract-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 sm:p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
-            <!-- Modal Header -->
             <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
                 <h3 id="modal-title" class="text-sm sm:text-base font-bold flex items-center gap-2">
                     <i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> 신규 계약 등록
@@ -403,11 +415,9 @@
                 <button onclick="closeContractModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
 
-            <!-- Modal Form Body -->
             <form id="contract-form" onsubmit="handleSaveContract(event)" class="p-4 sm:p-6 overflow-y-auto custom-scrollbar space-y-3.5 sm:space-y-4 flex-1 text-xs">
                 <input type="hidden" id="form-id">
 
-                <!-- 기본 정보 -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="font-semibold text-slate-700 block mb-1">법인명 *</label>
@@ -457,7 +467,6 @@
                     </div>
                 </div>
 
-                <!-- 팀원 공동 기여율 배분 영역 (합계 100% 필수 체크) -->
                 <div class="border border-slate-200 rounded-xl p-3.5 sm:p-4 bg-white">
                     <div class="flex items-center justify-between mb-2">
                         <span class="font-bold text-slate-800 flex items-center gap-1.5">
@@ -470,9 +479,7 @@
                     </div>
                     <p class="text-[11px] text-slate-400 mb-3">참여한 팀원의 기여율(%)을 입력하세요. <b>기여율 합계가 정확히 100%가 되어야 저장이 가능합니다.</b></p>
 
-                    <div id="modal-contributions-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                        <!-- Contribution rows rendered here -->
-                    </div>
+                    <div id="modal-contributions-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
 
                     <button type="button" onclick="addContributionRow()" class="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
                         <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + 참여 팀원 추가
@@ -490,7 +497,6 @@
                     </div>
                 </div>
 
-                <!-- Submit Buttons -->
                 <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
                     <button type="button" onclick="closeContractModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium">취소</button>
                     <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-sm transition">저장하기</button>
@@ -499,9 +505,53 @@
         </div>
     </div>
 
+    <!-- ================= MODAL: FIREBASE CLOUD CONFIG ================= -->
+    <div id="firebase-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+            <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+                <h3 class="text-sm sm:text-base font-bold flex items-center gap-2">
+                    <i data-lucide="cloud-cog" class="w-4 h-4 text-blue-400"></i> Firebase 클라우드 실시간 연동 설정
+                </h3>
+                <button onclick="closeFirebaseConfigModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="p-5 overflow-y-auto custom-scrollbar space-y-4 text-xs">
+                <div class="bg-blue-50 p-3.5 rounded-xl border border-blue-200 text-blue-900 space-y-1">
+                    <p class="font-bold flex items-center gap-1.5"><i data-lucide="info" class="w-4 h-4 text-blue-600"></i> 클라우드 실시간 동기화란?</p>
+                    <p class="text-[11px] text-blue-800 leading-relaxed">
+                        Google Firebase를 연동하면 PC나 스마트폰 어디서 계약을 등록/수정해도 <b>별도 파일 이동 없이 모든 기기가 1초 만에 실시간 동기화</b>됩니다.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-800 block mb-1">Firebase 설정 객체 (firebaseConfig JSON)</label>
+                    <p class="text-[11px] text-slate-500 mb-2">Firebase 콘솔에서 발급받은 `firebaseConfig` 전체를 복사하여 아래에 붙여넣어 주세요.</p>
+                    <textarea id="firebase-config-input" rows="8" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "team1-gfc.firebaseapp.com",
+  "projectId": "team1-gfc",
+  "storageBucket": "team1-gfc.appspot.com",
+  "messagingSenderId": "...",
+  "appId": "..."
+}' class="w-full font-mono text-[11px] border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"></textarea>
+                </div>
+
+                <div class="pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                    <button type="button" onclick="uploadInitialDataToFirebase()" id="btn-seed-firebase" class="px-3.5 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-bold transition flex items-center gap-1.5 border border-indigo-200">
+                        <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> 초기 데이터(193건) 클라우드 업로드
+                    </button>
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button" onclick="closeFirebaseConfigModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium">닫기</button>
+                        <button type="button" onclick="saveFirebaseConfig()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-sm transition">연동 저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Data Injection & Core Script -->
     <script>
-        // Initial Parsed Data from Excel (with 500% promotion and clean rebates)
+        // Initial Dataset & Members
         const INITIAL_DATA = [{"id": 1, "corp": "천안센텀정형외과", "insured": "10명", "month": "10", "date": "2025-09-30", "category": "단체", "product": "기업재해보장보험 1종(100%,10년)", "premium": 585084.0, "conversion": 303765.0, "promotion": 0, "rebate": 1.0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 121506.0}, {"name": "전현수", "rate": 0.01, "amount": 3037.65}, {"name": "맹주석", "rate": 0.3, "amount": 91129.5}, {"name": "권상헌", "rate": 0.15, "amount": 45564.75}, {"name": "김정미", "rate": 0.15, "amount": 45564.75}], "remark": "", "feedback": ""}, {"id": 2, "corp": "㈜한도", "insured": "김종원", "month": "10", "date": "2025-10-14", "category": "정기", "product": "CEO보장정기보험", "premium": 5129750.0, "conversion": 5899212.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 4719369.600000001}, {"name": "맹주석", "rate": 0.1, "amount": 589921.2000000001}, {"name": "권상헌", "rate": 0.05, "amount": 294960.60000000003}, {"name": "김정미", "rate": 0.05, "amount": 294960.60000000003}], "remark": "", "feedback": ""}, {"id": 3, "corp": "㈜한도", "insured": "김종원", "month": "10", "date": "2025-10-14", "category": "정기", "product": "CEO보장정기보험", "premium": 5129750.0, "conversion": 5899212.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 4719369.600000001}, {"name": "맹주석", "rate": 0.1, "amount": 589921.2000000001}, {"name": "권상헌", "rate": 0.05, "amount": 294960.60000000003}, {"name": "김정미", "rate": 0.05, "amount": 294960.60000000003}], "remark": "", "feedback": ""}, {"id": 4, "corp": "에프엔에스테크㈜", "insured": "5명", "month": "10", "date": "2025-10-14", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 307950.0, "conversion": 263175.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 131587.5}, {"name": "김은경", "rate": 0.5, "amount": 131587.5}], "remark": "", "feedback": ""}, {"id": 5, "corp": "에프엔에스테크㈜", "insured": "3명", "month": "10", "date": "2025-10-14", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 164210.0, "conversion": 180614.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.6, "amount": 108368.4}, {"name": "정형도", "rate": 0.4, "amount": 72245.6}], "remark": "", "feedback": ""}, {"id": 6, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "10", "date": "2025-10-29", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 49190.0, "conversion": 43818.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 21909.0}, {"name": "맹주석", "rate": 0.5, "amount": 21909.0}], "remark": "", "feedback": ""}, {"id": 7, "corp": "㈜글로벤스", "insured": "19명", "month": "10", "date": "2025-10-24", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 406490.0, "conversion": 449274.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 179709.6}, {"name": "김은경", "rate": 0.3, "amount": 134782.19999999998}, {"name": "송준범", "rate": 0.3, "amount": 134782.19999999998}], "remark": "", "feedback": ""}, {"id": 8, "corp": "㈜에이디텍건축사무소", "insured": "36명", "month": "10", "date": "2025-10-29", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 893578.0, "conversion": 977093.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 781674.4}, {"name": "맹주석", "rate": 0.05, "amount": 48854.65}, {"name": "권상헌", "rate": 0.05, "amount": 48854.65}, {"name": "김경호", "rate": 0.1, "amount": 97709.3}], "remark": "", "feedback": ""}, {"id": 9, "corp": "㈜에스비딤채", "insured": "이재홍", "month": "10", "date": "2025-10-27", "category": "종신", "product": "더행복종신보험", "premium": 3225000.0, "conversion": 1773750.0, "promotion": 300.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.7, "amount": 1241625.0}, {"name": "맹주석", "rate": 0.1, "amount": 177375.0}, {"name": "송준범", "rate": 0.1, "amount": 177375.0}, {"name": "김기만", "rate": 0.1, "amount": 177375.0}], "remark": "", "feedback": ""}, {"id": 10, "corp": "㈜대림엠이씨", "insured": "이민규", "month": "10", "date": "2025-10-30", "category": "종신", "product": "더행복종신보험", "premium": 3127500.0, "conversion": 1720125.0, "promotion": 300.0, "rebate": 200.0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1720125.0}], "remark": "", "feedback": ""}, {"id": 11, "corp": "개인명의", "insured": "조하나", "month": "10", "date": "2025-10-31", "category": "종신", "product": "더행복종신보험", "premium": 3133600.0, "conversion": 1723480.0, "promotion": 300.0, "rebate": 200.0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 1378784.0}, {"name": "김희태", "rate": 0.1, "amount": 172348.0}, {"name": "고은영", "rate": 0.1, "amount": 172348.0}, {"name": "신남수", "rate": 0.1, "amount": 20.0}], "remark": "", "feedback": ""}, {"id": 12, "corp": "㈜우룡실업", "insured": "1명", "month": "11", "date": "2025-11-03", "category": "단체", "product": "기업재해보장보험 1종(40%15년)", "premium": 31285.0, "conversion": 32760.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 32760.0}], "remark": "", "feedback": ""}, {"id": 13, "corp": "지엠에스리테일", "insured": "유민상", "month": "11", "date": "2025-11-03", "category": "종신", "product": "더행복종신보험", "premium": 3075100.0, "conversion": 1691305.0, "promotion": 300.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.6, "amount": 1014783.0}, {"name": "맹주석", "rate": 0.2, "amount": 338261.0}, {"name": "권상헌", "rate": 0.2, "amount": 338261.0}], "remark": "", "feedback": ""}, {"id": 14, "corp": "㈜씨스코", "insured": "21명", "month": "11", "date": "2025-11-10", "category": "단체", "product": "기업재해보장보험 1종(60%,5년)", "premium": 512640.0, "conversion": 297960.0, "promotion": 100.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 119184.0}, {"name": "맹주석", "rate": 0.4, "amount": 119184.0}, {"name": "권상헌", "rate": 0.2, "amount": 59592.0}], "remark": "", "feedback": ""}, {"id": 15, "corp": "㈜에이디텍건축사무소", "insured": "양성진", "month": "11", "date": "2025-11-18", "category": "정기", "product": "CEO보장정기보험", "premium": 10810000.0, "conversion": 12431500.0, "promotion": 700.0, "rebate": 1000.0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 9945200.0}, {"name": "맹주석", "rate": 0.1, "amount": 1243150.0}, {"name": "권상헌", "rate": 0.05, "amount": 621575.0}, {"name": "김은경", "rate": 0.05, "amount": 621575.0}], "remark": "", "feedback": ""}, {"id": 16, "corp": "㈜미성푸드서비스", "insured": "1명", "month": "11", "date": "2025-11-10", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 17020.0, "conversion": 16043.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 16043.0}], "remark": "", "feedback": ""}, {"id": 17, "corp": "개인명의", "insured": "임재철", "month": "11", "date": "2025-11-18", "category": "보장성", "product": "더퍼스트건강보험", "premium": 154654.0, "conversion": 183986.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 183986.0}], "remark": "", "feedback": ""}, {"id": 18, "corp": "㈜케이엠지", "insured": "1명", "month": "11", "date": "2025-11-19", "category": "단체", "product": "기업재해보장보험 1종(60%,15년)", "premium": 32320.0, "conversion": 41631.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 41631.0}], "remark": "", "feedback": ""}, {"id": 19, "corp": "㈜트루텍", "insured": "64명", "month": "11", "date": "2025-11-24", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 1595200.0, "conversion": 1613890.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1613890.0}], "remark": "", "feedback": ""}, {"id": 20, "corp": "㈜에이티케이코리아", "insured": "이문호", "month": "12", "date": "2025-12-04", "category": "정기", "product": "간편CEO보장정기보험", "premium": 3091400.0, "conversion": 3555110.0, "promotion": 300.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 1422044.0}, {"name": "맹주석", "rate": 0.1, "amount": 355511.0}, {"name": "권상헌", "rate": 0.1, "amount": 355511.0}, {"name": "신남수", "rate": 0.4, "amount": 1422044.0}], "remark": "", "feedback": ""}, {"id": 21, "corp": "㈜에이티케이코리아", "insured": "이문호", "month": "12", "date": "2025-12-04", "category": "보장성", "product": "경증간편플러스원", "premium": 504989.0, "conversion": 479736.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 239868.0}], "remark": "", "feedback": ""}, {"id": 22, "corp": "진흥이엔지㈜ ", "insured": "21명", "month": "12", "date": "2025-12-04", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 548570.0, "conversion": 537905.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 215162.0}, {"name": "맹주석", "rate": 0.15, "amount": 80685.75}, {"name": "권상헌", "rate": 0.15, "amount": 80685.75}, {"name": "김은경", "rate": 0.3, "amount": 161371.5}], "remark": "", "feedback": ""}, {"id": 23, "corp": "㈜에이디텍건축사무소", "insured": "양성진", "month": "12", "date": "2025-12-05", "category": "정기", "product": "CEO보장정기보험", "premium": 5405000.0, "conversion": 6215750.0, "promotion": 300.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6215750.0}], "remark": "", "feedback": ""}, {"id": 24, "corp": "㈜맛샘터", "insured": "1명", "month": "12", "date": "2025-12-09", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 4492.0, "conversion": 243.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 243.0}], "remark": "", "feedback": ""}, {"id": 25, "corp": "개인명의", "insured": "오경숙", "month": "12", "date": "2025-12-16", "category": "종신", "product": "더행복종신보험", "premium": 5046680.0, "conversion": 3633608.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 3633608.0}], "remark": "", "feedback": ""}, {"id": 26, "corp": "㈜경민에프에이", "insured": "정동환", "month": "12", "date": "2025-12-18", "category": "종신", "product": "간편더사랑종신보험", "premium": 5121000.0, "conversion": 2662920.0, "promotion": 500.0, "rebate": 12000.0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2662920.0}], "remark": "", "feedback": ""}, {"id": 27, "corp": "㈜경민에프에이", "insured": "정동환", "month": "12", "date": "2025-12-18", "category": "종신", "product": "간편더사랑종신보험", "premium": 5121000.0, "conversion": 2662920.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2662920.0}], "remark": "", "feedback": ""}, {"id": 28, "corp": "㈜경민에프에이", "insured": "정동환", "month": "12", "date": "2025-12-18", "category": "종신", "product": "간편더사랑종신보험", "premium": 5121000.0, "conversion": 2662920.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2662920.0}], "remark": "", "feedback": ""}, {"id": 29, "corp": "㈜경민에프에이", "insured": "정동환", "month": "12", "date": "2025-12-18", "category": "종신", "product": "간편더사랑종신보험", "premium": 5121000.0, "conversion": 2662920.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2662920.0}], "remark": "", "feedback": ""}, {"id": 30, "corp": "㈜경민에프에이", "insured": "정동환", "month": "12", "date": "2025-12-19", "category": "보장성", "product": "더퍼스트건강보험(간편3,5,5)", "premium": 95562.0, "conversion": 114408.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 114408.0}], "remark": "", "feedback": ""}, {"id": 31, "corp": "㈜경민에프에이", "insured": "배선향", "month": "12", "date": "2025-12-19", "category": "보장성", "product": "더퍼스트건강보험(간편3,10,5)", "premium": 546154.0, "conversion": 638501.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 255400.40000000002}, {"name": "맹주석", "rate": 0.2, "amount": 127700.20000000001}, {"name": "권상헌", "rate": 0.4, "amount": 255400.40000000002}], "remark": "", "feedback": ""}, {"id": 32, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "12", "date": "2025-12-19", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 7025.0, "conversion": 5217.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 5217.0}], "remark": "", "feedback": ""}, {"id": 33, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "12", "date": "2025-12-19", "category": "단체", "product": "단체보장보험", "premium": 4950.0, "conversion": 31.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 31.0}], "remark": "", "feedback": ""}, {"id": 34, "corp": "개인명의", "insured": "곽예슬", "month": "12", "date": "2025-12-23", "category": "보장성", "product": "급여실손", "premium": 13770.0, "conversion": 688.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 688.0}], "remark": "", "feedback": ""}, {"id": 35, "corp": "개인명의", "insured": "박창순", "month": "12", "date": "2025-12-23", "category": "종신", "product": "더행복종신보험", "premium": 1024200.0, "conversion": 409680.0, "promotion": 500.0, "rebate": 500.0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 409680.0}], "remark": "", "feedback": ""}, {"id": 36, "corp": "개인명의", "insured": "곽예슬", "month": "12", "date": "2025-12-29", "category": "보장성", "product": "The퍼스트건강보험(건강10년)", "premium": 135546.0, "conversion": 162156.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 81078.0}, {"name": "김은경", "rate": 0.5, "amount": 81078.0}], "remark": "", "feedback": ""}, {"id": 37, "corp": "케이엔에스솔루션㈜", "insured": "손은경", "month": "12", "date": "2025-12-29", "category": "보장성", "product": "The퍼스트건강보험(건강10년)", "premium": 51202.0, "conversion": 61182.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 61182.0}], "remark": "", "feedback": ""}, {"id": 38, "corp": "㈜수하이엔에스", "insured": "1명", "month": "12", "date": "2025-12-30", "category": "단체", "product": "단체보장보험", "premium": 1136.0, "conversion": 270.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 270.0}], "remark": "", "feedback": ""}, {"id": 39, "corp": "㈜수하이엔에스", "insured": "1명", "month": "12", "date": "2025-12-30", "category": "단체", "product": "단체보장보험", "premium": 1136.0, "conversion": 270.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 270.0}], "remark": "", "feedback": ""}, {"id": 40, "corp": "㈜수하이엔에스", "insured": "1명", "month": "12", "date": "2025-12-30", "category": "단체", "product": "단체보장보험", "premium": 1218.0, "conversion": 41.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 41.0}], "remark": "", "feedback": ""}, {"id": 41, "corp": "㈜수하이엔에스", "insured": "1명", "month": "12", "date": "2025-12-30", "category": "단체", "product": "단체보장보험", "premium": 1218.0, "conversion": 41.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 41.0}], "remark": "", "feedback": ""}, {"id": 42, "corp": "개인명의", "insured": "채석주", "month": "12", "date": "2025-12-30", "category": "보장성", "product": "The퍼스트건강보험(간편3,10,5)", "premium": 157277.0, "conversion": 188466.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 94233.0}, {"name": "김은경", "rate": 0.5, "amount": 94233.0}], "remark": "", "feedback": ""}, {"id": 43, "corp": "삼진정공㈜", "insured": "271명", "month": "12", "date": "2026-12-31", "category": "단체", "product": "단체보장보험", "premium": 1987750.0, "conversion": 29637.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 29637.0}], "remark": "", "feedback": ""}, {"id": 44, "corp": "㈜삼진정공", "insured": "52명", "month": "12", "date": "2026-12-31", "category": "단체", "product": "단체보장보험", "premium": 494590.0, "conversion": 5772.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 5772.0}], "remark": "", "feedback": ""}, {"id": 45, "corp": "㈜한남시멘트", "insured": "채정석", "month": "1", "date": "2025-12-31", "category": "종신", "product": "더행복종신보험", "premium": 5309000.0, "conversion": 2919950.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2919950.0}, {"name": "맹주석", "rate": 0.2, "amount": 583990.0}, {"name": "권상헌", "rate": 0.2, "amount": 583990.0}, {"name": "김은경", "rate": 0.2, "amount": 583990.0}], "remark": "", "feedback": ""}, {"id": 46, "corp": "개인명의", "insured": "채정석", "month": "1", "date": "2025-12-31", "category": "종신", "product": "더행복종신보험", "premium": 5309000.0, "conversion": 2919950.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2919950.0}], "remark": "", "feedback": ""}, {"id": 47, "corp": "㈜크라운", "insured": "3명", "month": "1", "date": "2026-01-05", "category": "단체", "product": "기업재해보장보험 1종(60%,15년)", "premium": 87006.0, "conversion": 90485.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 45242.5}, {"name": "고은영", "rate": 0.5, "amount": 45242.5}], "remark": "", "feedback": ""}, {"id": 48, "corp": "디앤애이치주식회사", "insured": "1명", "month": "1", "date": "2026-01-05", "category": "단체", "product": "기업재해보장보험", "premium": 1740.0, "conversion": 326.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 326.0}], "remark": "", "feedback": ""}, {"id": 49, "corp": "케이비오토텍 주식회사", "insured": "52명", "month": "1", "date": "2026-01-07", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 551096.0, "conversion": 661284.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.6, "amount": 396770.39999999997}, {"name": "맹주석", "rate": 0.4, "amount": 264513.60000000003}], "remark": "", "feedback": ""}, {"id": 50, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "1", "date": "2026-01-07", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 53110.0, "conversion": 46252.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 46252.0}], "remark": "", "feedback": ""}, {"id": 51, "corp": "운용현의도끼농장유한회사", "insured": "윤용현", "month": "1", "date": "2026-01-13", "category": "보장성", "product": "New플러스원건강보험(일반고지)", "premium": 1118093.0, "conversion": 1062186.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1062186.0}], "remark": "", "feedback": ""}, {"id": 52, "corp": "주식회사 수하이엔에스", "insured": "박종율", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(건강고지10년)", "premium": 105113.0, "conversion": 99855.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 99855.0}], "remark": "", "feedback": ""}, {"id": 53, "corp": "주식회사 수하이엔에스", "insured": "양진용", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(건강고지10년)", "premium": 55300.0, "conversion": 52419.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 52419.0}], "remark": "", "feedback": ""}, {"id": 54, "corp": "주식회사 수하이엔에스", "insured": "김선우", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(일반고지)", "premium": 58054.0, "conversion": 55149.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 55149.0}], "remark": "", "feedback": ""}, {"id": 55, "corp": "주식회사 수하이엔에스", "insured": "정명인", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(건강고지10년)", "premium": 105768.0, "conversion": 100478.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 100478.0}], "remark": "", "feedback": ""}, {"id": 56, "corp": "주식회사 수하이엔에스", "insured": "이현승", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(일반고지)", "premium": 10994.0, "conversion": 104492.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 104492.0}], "remark": "", "feedback": ""}, {"id": 57, "corp": "주식회사 수하이엔에스", "insured": "이헌승", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(간편3,10,5)", "premium": 105452.0, "conversion": 100178.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 100178.0}], "remark": "", "feedback": ""}, {"id": 58, "corp": "주식회사 수하이엔에스", "insured": "정병목", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(일반고지)", "premium": 53535.0, "conversion": 50857.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 50857.0}], "remark": "", "feedback": ""}, {"id": 59, "corp": "주식회사 수하이엔에스", "insured": "김영규", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "New플러스원건강보험(일반고지)", "premium": 55515.0, "conversion": 52737.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 52737.0}], "remark": "", "feedback": ""}, {"id": 60, "corp": "주식회사 수하이엔에스", "insured": "김재진", "month": "1", "date": "2026-01-15", "category": "보장성", "product": "The퍼스트건강보험(간편3,2,5)", "premium": 108842.0, "conversion": 130609.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 130609.0}], "remark": "", "feedback": ""}, {"id": 61, "corp": "㈜크라운", "insured": "1명", "month": "1", "date": "2026-01-19", "category": "단체", "product": "기업재해보장보험 1종(60%,15년)", "premium": 27662.0, "conversion": 29499.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 29499.0}], "remark": "", "feedback": ""}, {"id": 62, "corp": "㈜태인솔루션", "insured": "96명", "month": "1", "date": "2026-01-20", "category": "단체", "product": "단체보장보험", "premium": 155812.0, "conversion": 9104.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 9104.0}], "remark": "", "feedback": ""}, {"id": 63, "corp": "㈜태인솔루션", "insured": "5명", "month": "1", "date": "2026-01-20", "category": "단체", "product": "기업재해보장보험 1종(순수형)", "premium": 7300.0, "conversion": 1721.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1721.0}], "remark": "", "feedback": ""}, {"id": 64, "corp": "농업회사법인 ㈜에스비케이", "insured": "이재홍", "month": "1", "date": "2026-01-20", "category": "보장성", "product": "New플러스원건강보험", "premium": 215686.0, "conversion": 204900.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 204900.0}], "remark": "", "feedback": ""}, {"id": 65, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "1", "date": "2026-01-23", "category": "단체", "product": "단체보장보험", "premium": 10204.0, "conversion": 268.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 268.0}], "remark": "", "feedback": ""}, {"id": 66, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "1", "date": "2026-01-23", "category": "단체", "product": "기업재해보장보험", "premium": 15055.0, "conversion": 6843.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6843.0}], "remark": "", "feedback": ""}, {"id": 67, "corp": "케이비오토텍 주식회사", "insured": "3명", "month": "1", "date": "2026-01-23", "category": "단체", "product": "비즈쉐어보험", "premium": 45000.0, "conversion": 2700.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2700.0}], "remark": "", "feedback": ""}, {"id": 68, "corp": "케이비오토텍 주식회사", "insured": "25명", "month": "1", "date": "2026-01-23", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 264756.0, "conversion": 317692.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.65, "amount": 206499.80000000002}, {"name": "권상헌", "rate": 0.25, "amount": 79423.0}, {"name": "송준범", "rate": 0.1, "amount": 31769.2}], "remark": "", "feedback": ""}, {"id": 69, "corp": "마이크로컨텍솔루션", "insured": "2명", "month": "1", "date": "2026-01-23", "category": "단체", "product": "기업재해보장보험 1종(40%,7년)", "premium": 24680.0, "conversion": 16208.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 16208.0}], "remark": "", "feedback": ""}, {"id": 70, "corp": "마이크로컨텍솔루션", "insured": "194명", "month": "1", "date": "2026-01-23", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 3629124.0, "conversion": 2743408.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 2194726.4}, {"name": "맹주석", "rate": 0.1, "amount": 274340.8}, {"name": "송준범", "rate": 0.1, "amount": 274340.8}], "remark": "", "feedback": ""}, {"id": 71, "corp": "㈜에이알씨", "insured": "2명", "month": "1", "date": "2026-01-27", "category": "단체", "product": "기업재해보장(순수보장,3년)", "premium": 6016.0, "conversion": 1426.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1426.0}], "remark": "", "feedback": ""}, {"id": 72, "corp": "㈜에이알씨", "insured": "2명", "month": "1", "date": "2026-01-27", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 54328.0, "conversion": 50012.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 50012.0}], "remark": "", "feedback": ""}, {"id": 73, "corp": "㈜대한이엔지", "insured": "2명", "month": "1", "date": "2026-01-29", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 48328.0, "conversion": 37296.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 37296.0}], "remark": "", "feedback": ""}, {"id": 74, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "1", "date": "2026-01-29", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 58110.0, "conversion": 49752.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 49752.0}], "remark": "", "feedback": ""}, {"id": 75, "corp": "리인베스트먼트", "insured": "1명", "month": "1", "date": "2026-01-30", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 19246.0, "conversion": 15883.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 15883.0}], "remark": "", "feedback": ""}, {"id": 76, "corp": "㈜수하이이엔에스", "insured": "8명", "month": "1", "date": "2026-01-30", "category": "단체", "product": "기업재해보장보험", "premium": 9088.0, "conversion": 2160.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2160.0}], "remark": "", "feedback": ""}, {"id": 77, "corp": "㈜수하이이엔에스", "insured": "8명", "month": "1", "date": "2026-01-30", "category": "단체", "product": "단체보장보험", "premium": 9744.0, "conversion": 272.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 272.0}], "remark": "", "feedback": ""}, {"id": 78, "corp": "㈜한남시멘트", "insured": "채홍주", "month": "1", "date": "2026-01-30", "category": "보장성", "product": "The퍼스트건강보험(건강고지10년)", "premium": 83978.0, "conversion": 99940.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 99940.0}], "remark": "", "feedback": ""}, {"id": 79, "corp": "㈜한남시멘트", "insured": "채정석", "month": "1", "date": "2026-01-30", "category": "보장성", "product": "The퍼스트건강보험(건강고지10년)", "premium": 152991.0, "conversion": 183589.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 183589.0}], "remark": "", "feedback": ""}, {"id": 80, "corp": "개인명의", "insured": "이도원", "month": "2", "date": "2026-02-01", "category": "보장성", "product": "New플러스건강보험(건강고지10년)", "premium": 133302.0, "conversion": 171789.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 171789.0}], "remark": "", "feedback": ""}, {"id": 81, "corp": "씨에스이주식회사", "insured": "22명", "month": "2", "date": "2026-02-04", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 730926.0, "conversion": 758278.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 303311.2}, {"name": "맹주석", "rate": 0.2, "amount": 151655.6}, {"name": "권상헌", "rate": 0.3, "amount": 227483.4}, {"name": "김은경", "rate": 0.1, "amount": 75827.8}], "remark": "", "feedback": ""}, {"id": 82, "corp": "하나마이크론", "insured": "2명", "month": "2", "date": "2026-02-06", "category": "단체", "product": "기업재해보장보험 1종(60%,7년)", "premium": 47808.0, "conversion": 51886.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 51886.0}], "remark": "", "feedback": ""}, {"id": 83, "corp": "하나마이크론", "insured": "2명", "month": "2", "date": "2026-02-06", "category": "단체", "product": "단체보장보험", "premium": 29060.0, "conversion": 138.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 138.0}], "remark": "", "feedback": ""}, {"id": 84, "corp": "트루텍", "insured": "7명", "month": "2", "date": "2026-02-06", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 172640.0, "conversion": 173914.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 69565.6}, {"name": "맹주석", "rate": 0.3, "amount": 52174.2}, {"name": "권상헌", "rate": 0.3, "amount": 52174.2}], "remark": "", "feedback": ""}, {"id": 85, "corp": "엘에이치주식회사", "insured": "", "month": "2", "date": "2026-02-09", "category": "보장성", "product": "급여실손", "premium": 44820.0, "conversion": 2240.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2240.0}], "remark": "", "feedback": ""}, {"id": 86, "corp": "㈜맛샘터", "insured": "3명", "month": "2", "date": "2026-02-13", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 12476.0, "conversion": 729.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 729.0}], "remark": "", "feedback": ""}, {"id": 87, "corp": "주식회사 미소찬한돈", "insured": "지태호", "month": "2", "date": "2026-02-20", "category": "종신", "product": "더행복종신보험", "premium": 852600.0, "conversion": 596820.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 477456.0}, {"name": "맹주석", "rate": 0.2, "amount": 119364.0}], "remark": "", "feedback": ""}, {"id": 88, "corp": "주식회사 미소찬한돈", "insured": "지태호", "month": "2", "date": "2026-02-20", "category": "보장성", "product": "The퍼스트건강보험(간편3,2,5)", "premium": 230620.0, "conversion": 276264.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 276264.0}], "remark": "", "feedback": ""}, {"id": 89, "corp": "주식회사 미소찬한돈", "insured": "지윤", "month": "2", "date": "2026-02-20", "category": "보장성", "product": "New플러스원건강보험(일반고지)", "premium": 1011992.0, "conversion": 957851.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 766280.8}, {"name": "맹주석", "rate": 0.2, "amount": 191570.2}], "remark": "", "feedback": ""}, {"id": 90, "corp": "㈜알케미스트", "insured": "5명", "month": "2", "date": "2026-02-20", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 265040.0, "conversion": 261150.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 104460.0}, {"name": "맹주석", "rate": 0.2, "amount": 52230.0}, {"name": "권상헌", "rate": 0.1, "amount": 26115.0}, {"name": "김은경", "rate": 0.3, "amount": 78345.0}], "remark": "", "feedback": ""}, {"id": 91, "corp": "신세계환경㈜", "insured": "1명", "month": "2", "date": "2026-02-23", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 25407.0, "conversion": 21660.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 21660.0}], "remark": "", "feedback": ""}, {"id": 92, "corp": "㈜에이티케이코리아", "insured": "이영호", "month": "2", "date": "2026-02-23", "category": "보장성", "product": "The퍼스트건강보험(건강고지10년)", "premium": 262843.0, "conversion": 315392.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 315392.0}], "remark": "", "feedback": ""}, {"id": 93, "corp": "가율회계법인", "insured": "전오현", "month": "2", "date": "2026-02-24", "category": "보장성", "product": "New플러스건강보험(건강고지10년)", "premium": 1068606.0, "conversion": 1013450.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 810760.0}, {"name": "맹주석", "rate": 0.2, "amount": 202690.0}], "remark": "", "feedback": ""}, {"id": 94, "corp": "태종안전주식회사", "insured": "오흥년", "month": "2", "date": "2026-02-27", "category": "종신", "product": "더행복종신보험", "premium": 3110400.0, "conversion": 1244160.0, "promotion": 400.0, "rebate": 1200.0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1244160.0}], "remark": "", "feedback": ""}, {"id": 95, "corp": "하나더블유엘주식회사", "insured": "36명", "month": "2", "date": "2026-02-27", "category": "단체", "product": "단체보장보험", "premium": 162690.0, "conversion": 6809.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6809.0}], "remark": "", "feedback": ""}, {"id": 96, "corp": "주식회사 수하이엔에스", "insured": "4명", "month": "2", "date": "2026-02-27", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 4708.0, "conversion": 596.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 596.0}], "remark": "", "feedback": ""}, {"id": 97, "corp": "개인보험", "insured": "노인수", "month": "3", "date": "2026-03-03", "category": "보장성", "product": "The퍼스트건강보험(간편3,10,5)", "premium": 54586.0, "conversion": 64883.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 64883.0}], "remark": "", "feedback": ""}, {"id": 98, "corp": "㈜제일감정평가법인충남지사", "insured": "1명", "month": "3", "date": "2026-03-08", "category": "단체", "product": "기업재해보장보험 1종(90%,10년)", "premium": 66694.0, "conversion": 30765.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 15382.5}, {"name": "권상헌", "rate": 0.5, "amount": 15382.5}], "remark": "", "feedback": ""}, {"id": 99, "corp": "대림엠이씨 및 계열사 직원", "insured": "30명", "month": "3", "date": "2026-03-11", "category": "보장성", "product": "The퍼스트 & The라이트간편건강보험", "premium": 1370067.0, "conversion": 1519772.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1519772.0}], "remark": "", "feedback": ""}, {"id": 100, "corp": "대림엠이씨&부흥기술단 대표", "insured": "2명", "month": "3", "date": "2026-03-16", "category": "보장성", "product": "The퍼스트 & The라이트간편건강보험", "premium": 106824.0, "conversion": 101240.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 101240.0}], "remark": "", "feedback": ""}, {"id": 101, "corp": "㈜트루텍", "insured": "3명", "month": "3", "date": "2026-03-12", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 72320.0, "conversion": 73821.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 36910.5}, {"name": "김은경", "rate": 0.5, "amount": 36910.5}], "remark": "", "feedback": ""}, {"id": 102, "corp": "㈜맛샘터", "insured": "2명", "month": "3", "date": "2026-03-12", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 32560.0, "conversion": 31316.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 15658.0}, {"name": "권상헌", "rate": 0.5, "amount": 15658.0}], "remark": "", "feedback": ""}, {"id": 103, "corp": "㈜대양로지스", "insured": "이윤종", "month": "3", "date": "2026-03-13", "category": "종신", "product": "골든종신보험", "premium": 2506400.0, "conversion": 1629160.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1629160.0}], "remark": "", "feedback": ""}, {"id": 104, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "3", "date": "2026-03-13", "category": "단체", "product": "단체보장보험", "premium": 1560.0, "conversion": 50.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 50.0}], "remark": "", "feedback": ""}, {"id": 105, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "3", "date": "2026-03-13", "category": "단체", "product": "기업재해보장보험", "premium": 8255.0, "conversion": 6095.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6095.0}], "remark": "", "feedback": ""}, {"id": 106, "corp": "㈜우룡실업", "insured": "1명", "month": "3", "date": "2026-03-18", "category": "단체", "product": "기업재해보장보험 1종(40%15년)", "premium": 32320.0, "conversion": 30717.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 30717.0}], "remark": "", "feedback": ""}, {"id": 107, "corp": "개인보험", "insured": "맹정렬", "month": "3", "date": "2026-03-19", "category": "종신", "product": "밸런스종신보험", "premium": 513720.0, "conversion": 205488.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 205488.0}], "remark": "", "feedback": ""}, {"id": 108, "corp": "㈜한성넥스", "insured": "33명", "month": "3", "date": "2026-03-19", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 847428.0, "conversion": 958977.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 958977.0}], "remark": "", "feedback": ""}, {"id": 109, "corp": "에프엔에스테크㈜", "insured": "2명", "month": "3", "date": "2026-03-24", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 116720.0, "conversion": 99854.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 39941.600000000006}, {"name": "맹주석", "rate": 0.3, "amount": 29956.199999999997}, {"name": "권상헌", "rate": 0.3, "amount": 29956.199999999997}], "remark": "", "feedback": ""}, {"id": 110, "corp": "주식회사 수하이엔에스", "insured": "1명", "month": "3", "date": "2026-03-27", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 1218.0, "conversion": 22.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 22.0}], "remark": "", "feedback": ""}, {"id": 111, "corp": "㈜에이알씨", "insured": "7명", "month": "3", "date": "2026-03-27", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 224948.0, "conversion": 199402.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 79760.8}, {"name": "맹주석", "rate": 0.2, "amount": 39880.4}, {"name": "권상헌", "rate": 0.2, "amount": 39880.4}, {"name": "김은경", "rate": 0.2, "amount": 39880.4}], "remark": "", "feedback": ""}, {"id": 112, "corp": "㈜에이알씨", "insured": "39명", "month": "3", "date": "2026-03-27", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 115872.0, "conversion": 27466.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 27466.0}], "remark": "", "feedback": ""}, {"id": 113, "corp": "㈜백천기업", "insured": "7명", "month": "4", "date": "2026-04-03", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 294176.0, "conversion": 295083.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 118033.20000000001}, {"name": "맹주석", "rate": 0.2, "amount": 59016.600000000006}, {"name": "권상헌", "rate": 0.2, "amount": 59016.600000000006}, {"name": "김은경", "rate": 0.2, "amount": 59016.600000000006}], "remark": "", "feedback": ""}, {"id": 114, "corp": "㈜에스아이이", "insured": "1명", "month": "4", "date": "2026-04-09", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 24754.0, "conversion": 26163.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 26163.0}], "remark": "", "feedback": ""}, {"id": 115, "corp": "㈜맛샘터", "insured": "1명", "month": "4", "date": "2026-04-12", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 4492.0, "conversion": 243.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 243.0}], "remark": "", "feedback": ""}, {"id": 116, "corp": "㈜크라운", "insured": "1명", "month": "4", "date": "2026-04-16", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 26842.0, "conversion": 29011.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 11604.400000000001}, {"name": "맹주석", "rate": 0.3, "amount": 8703.3}, {"name": "권상헌", "rate": 0.3, "amount": 8703.3}], "remark": "", "feedback": ""}, {"id": 117, "corp": "㈜크라운", "insured": "5명", "month": "4", "date": "2026-04-21", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 89052.0, "conversion": 115400.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 46160.0}, {"name": "맹주석", "rate": 0.3, "amount": 34620.0}, {"name": "권상헌", "rate": 0.3, "amount": 34620.0}], "remark": "", "feedback": ""}, {"id": 118, "corp": "㈜크라운", "insured": "1명", "month": "4", "date": "2026-04-22", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 26008.0, "conversion": 29499.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 11799.6}, {"name": "맹주석", "rate": 0.3, "amount": 8849.699999999999}, {"name": "권상헌", "rate": 0.3, "amount": 8849.699999999999}], "remark": "", "feedback": ""}, {"id": 119, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "4", "date": "2026-04-24", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 60010.0, "conversion": 51082.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 20432.800000000003}, {"name": "맹주석", "rate": 0.3, "amount": 15324.599999999999}, {"name": "권상헌", "rate": 0.3, "amount": 15324.599999999999}], "remark": "", "feedback": ""}, {"id": 120, "corp": "㈜한도", "insured": "김종원", "month": "4", "date": "2026-04-27", "category": "종신", "product": "밸런스종신보험", "premium": 10318000.0, "conversion": 8254400.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 8254400.0}], "remark": "", "feedback": ""}, {"id": 121, "corp": "㈜삼현이엔지", "insured": "이동훈", "month": "4", "date": "2026-04-29", "category": "보장성", "product": "New플러스원건강보험", "premium": 559843.0, "conversion": 531850.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 212740.0}, {"name": "맹주석", "rate": 0.4, "amount": 212740.0}, {"name": "김은경", "rate": 0.2, "amount": 106370.0}], "remark": "", "feedback": ""}, {"id": 122, "corp": "하나더블유엘주식회사", "insured": "1명", "month": "4", "date": "2026-04-29", "category": "단체", "product": "단체보장보험", "premium": 2370.0, "conversion": 118.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 118.0}], "remark": "", "feedback": ""}, {"id": 123, "corp": "하나더블유엘주식회사", "insured": "1명", "month": "4", "date": "2026-04-29", "category": "단체", "product": "기업재해보장보험", "premium": 9296.0, "conversion": 10089.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 5044.5}, {"name": "권상헌", "rate": 0.5, "amount": 5044.5}], "remark": "", "feedback": ""}, {"id": 124, "corp": "㈜삼현이엔지", "insured": "변미숙", "month": "4", "date": "2026-04-29", "category": "보장성", "product": "New플러스원건강보험", "premium": 733262.0, "conversion": 696597.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 348298.5}, {"name": "맹주석", "rate": 0.5, "amount": 348298.5}], "remark": "", "feedback": ""}, {"id": 125, "corp": "하나마이크론", "insured": "7명", "month": "4", "date": "2026-04-30", "category": "단체", "product": "기업재해보장보험 1종(60%,7년)", "premium": 153680.0, "conversion": 166773.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 83386.5}, {"name": "권상헌", "rate": 0.5, "amount": 83386.5}], "remark": "", "feedback": ""}, {"id": 126, "corp": "하나마이크론", "insured": "513명", "month": "4", "date": "2026-04-30", "category": "단체", "product": "단체보장보험", "premium": 1436151.0, "conversion": 70302.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 70302.0}], "remark": "", "feedback": ""}, {"id": 127, "corp": "시알시피 주식회사", "insured": "전석종", "month": "5", "date": "2026-05-04", "category": "종신", "product": "간편 VVIP종신보험", "premium": 10672000.0, "conversion": 10672000.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 10672000.0}], "remark": "", "feedback": ""}, {"id": 128, "corp": "㈜고은이엠씨", "insured": "1명", "month": "5", "date": "2026-05-06", "category": "단체", "product": "기업재해보장보험(40%,15년)", "premium": 32320.0, "conversion": 30717.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 15358.5}, {"name": "권상헌", "rate": 0.5, "amount": 15358.5}], "remark": "", "feedback": ""}, {"id": 129, "corp": "(주)에이디텍건축사사무소", "insured": "9명", "month": "5", "date": "2026-05-06", "category": "단체", "product": "기업재해보장보험(40%,10년)", "premium": 164246.0, "conversion": 180912.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 72364.8}, {"name": "권상헌", "rate": 0.3, "amount": 54273.6}, {"name": "김은경", "rate": 0.3, "amount": 54273.6}], "remark": "", "feedback": ""}, {"id": 130, "corp": "개인보험", "insured": "박용자", "month": "5", "date": "2026-05-07", "category": "보장성", "product": "4180인생대표건강보험", "premium": 248409.0, "conversion": 247675.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 247675.0}], "remark": "", "feedback": ""}, {"id": 131, "corp": "㈜대양로지스", "insured": "1명", "month": "5", "date": "2026-05-08", "category": "단체", "product": "기입재해보장보험(90%,10년)", "premium": 108864.0, "conversion": 47765.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 23882.5}, {"name": "맹주석", "rate": 0.5, "amount": 23882.5}], "remark": "", "feedback": ""}, {"id": 132, "corp": "백제소방㈜", "insured": "1명", "month": "5", "date": "2026-05-11", "category": "단체", "product": "기입재해보장보험(40%,10년)", "premium": 16340.0, "conversion": 14819.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 14819.0}], "remark": "", "feedback": ""}, {"id": 133, "corp": "에프엔에스테크㈜", "insured": "2명", "month": "5", "date": "2026-05-11", "category": "단체", "product": "기업재해보장보험(70%,10년)", "premium": 118320.0, "conversion": 101034.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 50517.0}, {"name": "맹주석", "rate": 0.5, "amount": 50517.0}], "remark": "", "feedback": ""}, {"id": 134, "corp": "개인보험", "insured": "이은숙", "month": "5", "date": "2026-05-11", "category": "보장성", "product": "가족대표건강보험", "premium": 41680.0, "conversion": 51062.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 51062.0}], "remark": "", "feedback": ""}, {"id": 135, "corp": "디앤에이치주식회사", "insured": "2명", "month": "5", "date": "2026-05-12", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 4621.0, "conversion": 991.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 991.0}], "remark": "", "feedback": ""}, {"id": 136, "corp": "시알시피 주식회사", "insured": "김명연", "month": "5", "date": "2026-05-12", "category": "종신", "product": "간편밸런스종신보험", "premium": 13953600.0, "conversion": 7255872.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 5804697.600000001}, {"name": "맹주석", "rate": 0.1, "amount": 725587.2000000001}, {"name": "권상헌", "rate": 0.05, "amount": 362793.60000000003}, {"name": "김은경", "rate": 0.05, "amount": 362793.60000000003}], "remark": "", "feedback": ""}, {"id": 137, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "5", "date": "2026-05-14", "category": "단체", "product": "기업재해보장보험(40%,10년)", "premium": 9655.0, "conversion": 6249.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6249.0}], "remark": "", "feedback": ""}, {"id": 138, "corp": "하나머티리얼즈㈜", "insured": "3명", "month": "5", "date": "2026-05-14", "category": "단체", "product": "단체보장보험", "premium": 11076.0, "conversion": 57.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 57.0}], "remark": "", "feedback": ""}, {"id": 139, "corp": "코아시아코리아 주식회사", "insured": "1명", "month": "5", "date": "2026-05-18", "category": "단체", "product": "기업재해보장보험(60%,10년)", "premium": 20174.0, "conversion": 15094.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 15094.0}], "remark": "", "feedback": ""}, {"id": 140, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "5", "date": "2026-05-19", "category": "단체", "product": "기업재해보장보험(70%,10년)", "premium": 58710.0, "conversion": 50172.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 20068.800000000003}, {"name": "전현수", "rate": 30.0, "amount": 1505160.0}, {"name": "맹주석", "rate": 0.3, "amount": 15051.599999999999}], "remark": "", "feedback": ""}, {"id": 141, "corp": "㈜크라운", "insured": "2명", "month": "5", "date": "2026-05-20", "category": "단체", "product": "기업재해보장보험(60%,15년)", "premium": 55224.0, "conversion": 59049.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 29524.5}, {"name": "권상헌", "rate": 0.5, "amount": 29524.5}], "remark": "", "feedback": ""}, {"id": 142, "corp": "(주)에이디텍건축사사무소", "insured": "양성진", "month": "5", "date": "2026-05-22", "category": "보장성", "product": "New플러스건강보험(간편 3.10.5)", "premium": 527782.0, "conversion": 501391.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 501391.0}], "remark": "", "feedback": ""}, {"id": 143, "corp": "㈜명신기공", "insured": "방기복", "month": "5", "date": "2026-05-26", "category": "종신", "product": "밸런스종신보험", "premium": 2026200.0, "conversion": 1620960.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 810480.0}, {"name": "맹주석", "rate": 0.5, "amount": 810480.0}], "remark": "", "feedback": ""}, {"id": 144, "corp": "㈜명신기공", "insured": "조광희", "month": "5", "date": "2026-05-26", "category": "종신", "product": "간편 밸런스종신보험", "premium": 2004000.0, "conversion": 1503000.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 751500.0}, {"name": "김상우", "rate": 0.5, "amount": 751500.0}], "remark": "", "feedback": ""}, {"id": 145, "corp": "주식회사 수하이엔에스", "insured": "1명", "month": "5", "date": "2026-05-29", "category": "단체", "product": "기업재해보장보험 및 단체보장보험", "premium": 1944.0, "conversion": 280.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 280.0}], "remark": "", "feedback": ""}, {"id": 146, "corp": "(사)천안제3산업단지", "insured": "김영회", "month": "6", "date": "2026-06-01", "category": "보장성", "product": "가족대표건강보험(간편 3.5.5)", "premium": 87441.0, "conversion": 103963.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 103963.0}], "remark": "", "feedback": ""}, {"id": 147, "corp": "㈜우룡실업", "insured": "1명", "month": "6", "date": "2026-06-01", "category": "단체", "product": "기업재해보장보험(40%,15년)", "premium": 32320.0, "conversion": 30717.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 15358.5}, {"name": "김상우", "rate": 0.5, "amount": 15358.5}], "remark": "", "feedback": ""}, {"id": 148, "corp": "아산피앤피㈜", "insured": "3명", "month": "6", "date": "2026-06-08", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 25072.0, "conversion": 1018.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1018.0}], "remark": "", "feedback": ""}, {"id": 149, "corp": "㈜맛샘터", "insured": "2명", "month": "6", "date": "2026-06-11", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 8984.0, "conversion": 486.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 486.0}], "remark": "", "feedback": ""}, {"id": 150, "corp": "㈜한솔파워테크", "insured": "조하나", "month": "6", "date": "2026-06-11", "category": "보장성", "product": "더블보장보험(1종2형)", "premium": 2642500.0, "conversion": 2642500.0, "promotion": 200.0, "rebate": 1000.0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2642500.0}], "remark": "", "feedback": ""}, {"id": 151, "corp": "㈜한솔파워테크", "insured": "조현진", "month": "6", "date": "2026-06-11", "category": "보장성", "product": "더블보장보험(1종2형)", "premium": 2587500.0, "conversion": 2587500.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2587500.0}], "remark": "", "feedback": ""}, {"id": 152, "corp": "(주)에이디텍건축사사무소", "insured": "2명", "month": "6", "date": "2026-06-12", "category": "단체", "product": "기업재해보장보험", "premium": 33600.0, "conversion": 37255.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 18627.5}, {"name": "김상우", "rate": 0.45, "amount": 16764.75}, {"name": "이다운", "rate": 0.05, "amount": 1862.75}], "remark": "", "feedback": ""}, {"id": 153, "corp": "주식회사 해진", "insured": "1명", "month": "6", "date": "2026-06-14", "category": "단체", "product": "기업재해보장보험", "premium": 19768.0, "conversion": 18074.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 18074.0}], "remark": "", "feedback": ""}, {"id": 154, "corp": "㈜크라운", "insured": "1명", "month": "6", "date": "2026-06-18", "category": "단체", "product": "기업재해보장보험", "premium": 31212.0, "conversion": 31393.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 12557.2}, {"name": "맹주석", "rate": 0.3, "amount": 9417.9}, {"name": "권상헌", "rate": 0.3, "amount": 9417.9}], "remark": "", "feedback": ""}, {"id": 155, "corp": "포스텍㈜", "insured": "3명", "month": "6", "date": "2026-06-19", "category": "단체", "product": "기업재해보장보험", "premium": 225584.0, "conversion": 108142.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 54071.0}, {"name": "김상우", "rate": 0.5, "amount": 54071.0}], "remark": "", "feedback": ""}, {"id": 156, "corp": "하나머티리얼즈㈜", "insured": "700명", "month": "6", "date": "2026-06-21", "category": "단체", "product": "삼성단체보장보험", "premium": 3384442.0, "conversion": 206575.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 206575.0}], "remark": "", "feedback": ""}, {"id": 157, "corp": "하나머티리얼즈㈜", "insured": "16명", "month": "6", "date": "2026-06-22", "category": "단체", "product": "기업재해보장보험(40%,10년)", "premium": 144585.0, "conversion": 98065.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 39226.0}, {"name": "맹주석", "rate": 0.2, "amount": 19613.0}, {"name": "권상헌", "rate": 0.2, "amount": 19613.0}, {"name": "김상우", "rate": 0.2, "amount": 19613.0}], "remark": "", "feedback": ""}, {"id": 158, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "6", "date": "2026-06-23", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 59610.0, "conversion": 50802.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 20320.800000000003}, {"name": "김상우", "rate": 0.4, "amount": 20320.800000000003}, {"name": "김은경", "rate": 0.2, "amount": 10160.400000000001}], "remark": "", "feedback": ""}, {"id": 159, "corp": "개인보험", "insured": "오경숙", "month": "6", "date": "2026-06-24", "category": "보장성", "product": "New플러스건강보험(일반고지)", "premium": 1649312.0, "conversion": 1566312.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.65, "amount": 1018102.8}, {"name": "맹주석", "rate": 0.2, "amount": 313262.4}, {"name": "권상헌", "rate": 0.15, "amount": 234946.8}], "remark": "", "feedback": ""}, {"id": 160, "corp": "㈜대한이엔지", "insured": "1명", "month": "6", "date": "2026-06-24", "category": "단체", "product": "기업재해보장보험(40%,10년)", "premium": 24164.0, "conversion": 18648.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 9324.0}, {"name": "권상헌", "rate": 0.5, "amount": 9324.0}], "remark": "", "feedback": ""}, {"id": 161, "corp": "세코툴스코리아", "insured": "1명", "month": "6", "date": "2026-06-24", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 16404.0, "conversion": 2047.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 2047.0}], "remark": "", "feedback": ""}, {"id": 162, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "6", "date": "2026-06-29", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 60110.0, "conversion": 51152.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 25576.0}, {"name": "권상헌", "rate": 0.5, "amount": 25576.0}, {"name": "김상우", "rate": 0.4, "amount": 20460.800000000003}, {"name": "김은경", "rate": 0.2, "amount": 10230.400000000001}], "remark": "", "feedback": ""}, {"id": 163, "corp": "개인보험", "insured": "김명미", "month": "6", "date": "2026-06-30", "category": "보장성", "product": "New플러스건강보험(일반고지)", "premium": 203068.0, "conversion": 192914.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 192914.0}], "remark": "", "feedback": ""}, {"id": 164, "corp": "아산피앤피㈜", "insured": "2명", "month": "7", "date": "2026-07-03", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 74380.0, "conversion": 86424.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 43212.0}, {"name": "김상우", "rate": 0.5, "amount": 43212.0}], "remark": "", "feedback": ""}, {"id": 165, "corp": "에프앤에이치㈜", "insured": "8명", "month": "7", "date": "2026-07-09", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 186104.0, "conversion": 228301.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 91320.40000000001}, {"name": "맹주석", "rate": 0.2, "amount": 45660.200000000004}, {"name": "권상헌", "rate": 0.2, "amount": 45660.200000000004}, {"name": "김은경", "rate": 0.2, "amount": 45660.200000000004}], "remark": "", "feedback": ""}, {"id": 166, "corp": "(사)천안제3산업단지", "insured": "3명", "month": "7", "date": "2026-07-10", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 229888.0, "conversion": 284096.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 113638.40000000001}, {"name": "권상헌", "rate": 0.2, "amount": 56819.200000000004}, {"name": "김상우", "rate": 0.2, "amount": 56819.200000000004}, {"name": "김은경", "rate": 0.2, "amount": 56819.200000000004}], "remark": "", "feedback": ""}, {"id": 167, "corp": "글로벤스㈜", "insured": "17명", "month": "7", "date": "2026-07-13", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 365862.0, "conversion": 399840.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 159936.0}, {"name": "권상헌", "rate": 0.25, "amount": 99960.0}, {"name": "김상우", "rate": 0.25, "amount": 99960.0}, {"name": "김은경", "rate": 0.1, "amount": 39984.0}], "remark": "", "feedback": ""}, {"id": 168, "corp": "천일정공㈜", "insured": "김학봉", "month": "7", "date": "2026-07-13", "category": "보장성", "product": "New플러스건강보험(일반고지)", "premium": 1141220.0, "conversion": 1084158.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 542079.0}, {"name": "맹주석", "rate": 0.5, "amount": 542079.0}], "remark": "", "feedback": ""}, {"id": 169, "corp": "㈜고은이엠씨", "insured": "1명", "month": "7", "date": "2026-07-14", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 32320.0, "conversion": 30717.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 12286.800000000001}, {"name": "권상헌", "rate": 0.3, "amount": 9215.1}, {"name": "김은경", "rate": 0.3, "amount": 9215.1}], "remark": "", "feedback": ""}, {"id": 170, "corp": "㈜크라운", "insured": "1명", "month": "7", "date": "2026-07-15", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 26212.0, "conversion": 28666.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 11466.400000000001}, {"name": "권상헌", "rate": 0.3, "amount": 8599.8}, {"name": "김은경", "rate": 0.3, "amount": 8599.8}], "remark": "", "feedback": ""}, {"id": 171, "corp": "㈜수하이엔에스", "insured": "153명", "month": "7", "date": "2026-07-16", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 283212.0, "conversion": 59160.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 23664.0}, {"name": "권상헌", "rate": 0.3, "amount": 17748.0}, {"name": "김상우", "rate": 0.3, "amount": 17748.0}], "remark": "", "feedback": ""}, {"id": 172, "corp": "㈜마이크로컨텍솔루션", "insured": "1명", "month": "7", "date": "2026-07-20", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 14596.0, "conversion": 11845.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 4738.0}, {"name": "권상헌", "rate": 0.3, "amount": 3553.5}, {"name": "김은경", "rate": 0.3, "amount": 3553.5}], "remark": "", "feedback": ""}, {"id": 173, "corp": "하나머티리얼즈㈜", "insured": "26명", "month": "7", "date": "2026-07-20", "category": "단체", "product": "기업재해보장보험(40%,10년)", "premium": 232840.0, "conversion": 158812.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 63524.8}, {"name": "권상헌", "rate": 0.3, "amount": 47643.6}, {"name": "김은경", "rate": 0.3, "amount": 47643.6}], "remark": "", "feedback": ""}, {"id": 174, "corp": "하나머티리얼즈㈜", "insured": "25명", "month": "7", "date": "2026-07-20", "category": "단체", "product": "삼성단체보장보험", "premium": 99616.0, "conversion": 5391.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 5391.0}], "remark": "", "feedback": ""}, {"id": 175, "corp": "개인보험", "insured": "이은숙", "month": "7", "date": "2026-07-23", "category": "보장성", "product": "New플러스건강보험(간편 3.10.5)", "premium": 1009526.0, "conversion": 1304419.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1304419.0}], "remark": "", "feedback": ""}, {"id": 176, "corp": "㈜케이엠지", "insured": "임동근", "month": "7", "date": "2026-07-23", "category": "단체", "product": "기업재해보장보험(60%,15년)", "premium": 57694.0, "conversion": 76771.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 30708.4}, {"name": "권상헌", "rate": 0.3, "amount": 23031.3}, {"name": "김은경", "rate": 0.3, "amount": 23031.3}], "remark": "", "feedback": ""}, {"id": 177, "corp": "㈜고은이엠씨", "insured": "정두희", "month": "7", "date": "2026-07-27", "category": "보장성", "product": "New플러스건강보험(간편 3.10.5)", "premium": 1364778.0, "conversion": 1295925.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 1036740.0}, {"name": "권상헌", "rate": 0.1, "amount": 129592.5}, {"name": "김상우", "rate": 0.1, "amount": 129592.5}], "remark": "", "feedback": ""}, {"id": 178, "corp": "㈜우룡실업", "insured": "1명", "month": "7", "date": "2026-07-27", "category": "단체", "product": "기업재해보장보험(40%,15년)", "premium": 32330.0, "conversion": 30717.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 15358.5}, {"name": "김상우", "rate": 0.5, "amount": 15358.5}], "remark": "", "feedback": ""}, {"id": 179, "corp": "개인보험", "insured": "임채광", "month": "7", "date": "2026-07-28", "category": "보장성", "product": "New플러스건강보험(일반고지)", "premium": 254357.0, "conversion": 241637.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 193309.6}, {"name": "권상헌", "rate": 0.2, "amount": 48327.4}], "remark": "", "feedback": ""}, {"id": 180, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "7", "date": "2026-07-29", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 42494.0, "conversion": 50569.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 20227.600000000002}, {"name": "권상헌", "rate": 0.3, "amount": 15170.699999999999}, {"name": "김상우", "rate": 0.3, "amount": 15170.699999999999}], "remark": "", "feedback": ""}, {"id": 181, "corp": "개인보험", "insured": "이경숙1", "month": "8", "date": "2026-08-04", "category": "종신", "product": "VVIP종신보험 라이트(표준체)", "premium": 6139000.0, "conversion": 6445950.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.6, "amount": 3867570.0}, {"name": "맹주석", "rate": 0.2, "amount": 1289190.0}, {"name": "권상헌", "rate": 0.2, "amount": 1289190.0}], "remark": "", "feedback": ""}, {"id": 182, "corp": "개인보험", "insured": "이경숙2", "month": "8", "date": "2026-08-04", "category": "종신", "product": "VVIP종신보험 라이트(표준체)", "premium": 6139000.0, "conversion": 6445950.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6445950.0}], "remark": "", "feedback": ""}, {"id": 183, "corp": "개인보험", "insured": "이경숙3", "month": "8", "date": "2026-08-04", "category": "종신", "product": "VVIP종신보험 라이트(표준체)", "premium": 6139000.0, "conversion": 6445950.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6445950.0}], "remark": "", "feedback": ""}, {"id": 184, "corp": "개인보험", "insured": "이정우1", "month": "8", "date": "2026-08-04", "category": "종신", "product": "VVIP종신보험 라이트(표준체)", "premium": 6538000.0, "conversion": 6864900.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.6, "amount": 4118940.0}, {"name": "맹주석", "rate": 0.2, "amount": 1372980.0}, {"name": "김은경", "rate": 0.2, "amount": 1372980.0}], "remark": "", "feedback": ""}, {"id": 185, "corp": "개인보험", "insured": "이정우2", "month": "8", "date": "2026-08-04", "category": "종신", "product": "VVIP종신보험 라이트(표준체)", "premium": 6538000.0, "conversion": 6864900.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6864900.0}], "remark": "", "feedback": ""}, {"id": 186, "corp": "개인보험", "insured": "이정우3", "month": "8", "date": "2026-08-04", "category": "종신", "product": "VVIP종신보험 라이트(표준체)", "premium": 6538000.0, "conversion": 6864900.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6864900.0}], "remark": "", "feedback": ""}, {"id": 187, "corp": "에프엔에스테크㈜", "insured": "4명", "month": "8", "date": "2026-08-05", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 242540.0, "conversion": 206078.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 103039.0}, {"name": "김상우", "rate": 0.5, "amount": 103039.0}], "remark": "", "feedback": ""}, {"id": 188, "corp": "디앤에이치주식회사", "insured": "1명", "month": "8", "date": "2026-08-05", "category": "단체", "product": "기업재해보장보험(순수보장형)", "premium": 2960.0, "conversion": 567.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 567.0}], "remark": "", "feedback": ""}, {"id": 189, "corp": "㈜에이치원이엔지", "insured": "3명", "month": "8", "date": "2026-08-14", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 187895.0, "conversion": 192401.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 96200.5}, {"name": "김상우", "rate": 0.5, "amount": 96200.5}], "remark": "", "feedback": ""}, {"id": 190, "corp": "하나머티리얼즈㈜", "insured": "2명", "month": "8", "date": "2026-08-19", "category": "단체", "product": "삼성단체보험", "premium": 951.0, "conversion": 905.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 905.0}], "remark": "", "feedback": ""}, {"id": 191, "corp": "하나머티리얼즈㈜", "insured": "1명", "month": "8", "date": "2026-08-19", "category": "단체", "product": "기업재해보장보험(40%,10년)", "premium": 9455.0, "conversion": 6227.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 6227.0}], "remark": "", "feedback": ""}, {"id": 199, "corp": "", "insured": "", "month": "", "date": "", "category": "", "product": "월별환산환계", "premium": 0, "conversion": 0, "promotion": 0, "rebate": 0, "contributions": [], "remark": "", "feedback": ""}, {"id": 202, "corp": "", "insured": "", "month": "", "date": "", "category": "", "product": "", "premium": 0, "conversion": 0, "promotion": 0, "rebate": 0, "contributions": [], "remark": "", "feedback": ""}];
         const TEAM_MEMBERS = ["사업부장님", "전현수", "정형도", "홍종보", "맹주석", "권상헌", "김상우", "김정미", "김은경", "김경호", "송준범", "김기만", "김희태", "고은영", "신남수", "이다운"];
 
@@ -513,7 +563,12 @@
         let chartCategory = null;
         let chartMembers = null;
 
-        // Helper: Extract Year from contract
+        // Firebase State
+        let db = null;
+        let isFirebaseConnected = false;
+        let unsubscribeFirestore = null;
+
+        // Helper: Extract Year & Month
         function getContractYear(c) {
             if (c.date && c.date.length >= 4 && !isNaN(c.date.substring(0, 4))) {
                 return c.date.substring(0, 4);
@@ -521,7 +576,6 @@
             return '2025';
         }
 
-        // Helper: Extract Month from contract
         function getContractMonth(c) {
             if (c.month !== undefined && c.month !== null && String(c.month).trim() !== '') {
                 return String(c.month).trim();
@@ -532,13 +586,11 @@
             return '';
         }
 
-        // Get sorted available years from contracts
         function getAvailableYears() {
             const years = [...new Set(contracts.map(c => getContractYear(c)).filter(Boolean))];
-            return years.sort((a,b) => Number(b) - Number(a)); // Descending: 2026, 2025
+            return years.sort((a,b) => Number(b) - Number(a));
         }
 
-        // Get sorted available months for a specific year
         function getAvailableMonthsForYear(year) {
             const filtered = year === 'ALL' ? contracts : contracts.filter(c => getContractYear(c) === year);
             const months = [...new Set(filtered.map(c => getContractMonth(c)).filter(Boolean))];
@@ -547,6 +599,18 @@
 
         // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            if (!isFirebaseConnected) {
+                loadFromLocalStorage();
+            }
+            initAllFilters();
+            renderDashboard();
+            renderTable();
+            renderMemberSelect();
+            lucide.createIcons();
+        });
+
+        function loadFromLocalStorage() {
             const saved = localStorage.getItem('gfc_contracts_data_v3');
             if (saved) {
                 try {
@@ -558,18 +622,145 @@
                 contracts = [...INITIAL_DATA];
                 saveToLocalStorage();
             }
-
-            initAllFilters();
-            renderDashboard();
-            renderTable();
-            renderMemberSelect();
-            lucide.createIcons();
-        });
+        }
 
         function saveToLocalStorage() {
             localStorage.setItem('gfc_contracts_data_v3', JSON.stringify(contracts));
         }
 
+        // ================= FIREBASE CLOUD SYNC =================
+        function initFirebase() {
+            const configStr = localStorage.getItem('gfc_firebase_config');
+            if (!configStr) {
+                updateCloudStatus(false, '로컬 저장소 (클릭하여 연동)');
+                return;
+            }
+
+            try {
+                const config = JSON.parse(configStr);
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config);
+                }
+                db = firebase.firestore();
+                isFirebaseConnected = true;
+                updateCloudStatus(true, '클라우드 실시간 연동 중');
+
+                // Real-time listener
+                if (unsubscribeFirestore) unsubscribeFirestore();
+                unsubscribeFirestore = db.collection('contracts').orderBy('id', 'desc').onSnapshot((snapshot) => {
+                    if (!snapshot.empty) {
+                        const cloudData = [];
+                        snapshot.forEach(doc => {
+                            cloudData.push({ ...doc.data(), docId: doc.id });
+                        });
+                        contracts = cloudData;
+                        saveToLocalStorage();
+                        initAllFilters();
+                        renderDashboard();
+                        renderTable();
+                        renderMemberDetail();
+                        console.log('Realtime synced from Firebase Firestore:', contracts.length);
+                    } else {
+                        console.log('Firebase collection is empty. Ready for seed.');
+                    }
+                }, (err) => {
+                    console.error('Firestore snapshot error:', err);
+                    updateCloudStatus(false, '연동 오류 (보안규칙 확인)');
+                });
+
+            } catch (err) {
+                console.error('Firebase init failed:', err);
+                updateCloudStatus(false, '설정 오류 (재설정 필요)');
+            }
+        }
+
+        function updateCloudStatus(connected, text) {
+            const dot = document.getElementById('cloud-status-dot');
+            const txt = document.getElementById('cloud-status-text');
+            const badge = document.getElementById('cloud-status-badge');
+
+            if (txt) txt.innerText = text;
+            if (connected) {
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                if (badge) badge.className = 'cursor-pointer px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700 flex items-center gap-1 hover:border-emerald-400 transition';
+            } else {
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+                if (badge) badge.className = 'cursor-pointer px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1 hover:border-blue-400 transition';
+            }
+        }
+
+        function openFirebaseConfigModal() {
+            const configStr = localStorage.getItem('gfc_firebase_config') || '';
+            document.getElementById('firebase-config-input').value = configStr;
+            document.getElementById('firebase-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeFirebaseConfigModal() {
+            document.getElementById('firebase-modal').classList.add('hidden');
+        }
+
+        function saveFirebaseConfig() {
+            let rawInput = document.getElementById('firebase-config-input').value.trim();
+            if (!rawInput) {
+                localStorage.removeItem('gfc_firebase_config');
+                alert('Firebase 설정이 제거되었습니다. 로컬 저장소 모드로 전환됩니다.');
+                location.reload();
+                return;
+            }
+
+            if (rawInput.includes('=')) {
+                rawInput = rawInput.substring(rawInput.indexOf('=') + 1).replace(';', '').trim();
+            }
+
+            try {
+                const parsed = (new Function(`return ${rawInput}`))();
+                localStorage.setItem('gfc_firebase_config', JSON.stringify(parsed));
+                alert('✅ Firebase 설정이 저장되었습니다! 페이지를 새로고침하여 연결합니다.');
+                location.reload();
+            } catch (e) {
+                alert('⚠️ 유효한 JSON/JavaScript 객체 형태가 아닙니다.\nFirebase 콘솔의 firebaseConfig 코드를 올바르게 입력해주세요.');
+            }
+        }
+
+        async function uploadInitialDataToFirebase() {
+            if (!db || !isFirebaseConnected) {
+                alert('먼저 Firebase 설정을 완료하고 연동 저장을 해주세요.');
+                return;
+            }
+
+            if (!confirm(`현재 로컬 데이터(${contracts.length}건)를 Firebase 클라우드 데이터베이스로 일괄 업로드하시겠습니까?`)) {
+                return;
+            }
+
+            const btn = document.getElementById('btn-seed-firebase');
+            btn.innerText = '업로드 진행 중...';
+            btn.disabled = true;
+
+            try {
+                const batchSize = 100;
+                for (let i = 0; i < contracts.length; i += batchSize) {
+                    const batch = db.batch();
+                    const slice = contracts.slice(i, i + batchSize);
+                    slice.forEach(c => {
+                        const docRef = db.collection('contracts').doc(String(c.id));
+                        batch.set(docRef, c);
+                    });
+                    await batch.commit();
+                }
+                alert(`🎉 총 ${contracts.length}건의 데이터가 Firebase 클라우드에 성공적으로 업로드되었습니다!`);
+                closeFirebaseConfigModal();
+            } catch (err) {
+                console.error(err);
+                alert('업로드 실패: ' + err.message + '\n(Firebase 콘솔에서 Firestore 보안 규칙을 읽기/쓰기 허용으로 설정했는지 확인하세요.)');
+            } finally {
+                btn.innerHTML = '<i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> 초기 데이터(193건) 클라우드 업로드';
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+
+        // ================= TAB SWITCHING =================
         function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -588,31 +779,26 @@
             lucide.createIcons();
         }
 
-        // ================= FILTER INITIALIZATION =================
+        // ================= FILTERS =================
         function initAllFilters() {
             const years = getAvailableYears();
 
-            // 1. Dashboard Year Selector
             const dashYear = document.getElementById('dash-year-select');
             dashYear.innerHTML = '<option value="ALL">전체 기간</option>' + years.map(y => `<option value="${y}">${y}년</option>`).join('');
             if (years.length > 0) {
-                dashYear.value = years[0]; // Default to 2026
+                dashYear.value = years[0];
             }
             updateDashMonthOptions();
 
-            // 2. Contract List Period Filter (전체기간, 연도전체, 연도별 월간)
             buildPeriodFilterOptions('filter-period');
 
-            // 3. Contract List Category Filter
             const categories = [...new Set(contracts.map(c => c.category).filter(Boolean))];
             const filterCat = document.getElementById('filter-category');
             filterCat.innerHTML = '<option value="ALL">전체 구분</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
 
-            // 4. Contract List Member Filter
             const filterMem = document.getElementById('filter-member');
             filterMem.innerHTML = '<option value="ALL">전체 팀원</option>' + TEAM_MEMBERS.map(m => `<option value="${m}">${m}</option>`).join('');
 
-            // 5. Member Tab Period Selector
             buildPeriodFilterOptions('member-period-select');
         }
 
@@ -669,7 +855,7 @@
             return true;
         }
 
-        // ================= 1. DASHBOARD RENDERING =================
+        // ================= 1. DASHBOARD =================
         function renderDashboard() {
             const selectedYear = document.getElementById('dash-year-select').value;
             const selectedMonth = document.getElementById('dash-month-select').value;
@@ -686,7 +872,6 @@
             const totalPremium = filtered.reduce((acc, c) => acc + (c.premium || 0), 0);
             const totalConversion = filtered.reduce((acc, c) => acc + (c.conversion || 0), 0);
 
-            // Leader Conversion
             let leaderConversion = 0;
             filtered.forEach(c => {
                 (c.contributions || []).forEach(contrib => {
@@ -712,7 +897,6 @@
         }
 
         function renderCharts(selectedYear, selectedMonth, currentData) {
-            // 1. Monthly Chart
             const yearForTrend = selectedYear === 'ALL' ? (getAvailableYears()[0] || '2026') : selectedYear;
             document.getElementById('chart-monthly-title').innerText = `${yearForTrend}년 월별 환산 실적 및 계약 건수 추이`;
 
@@ -794,7 +978,6 @@
                 }
             });
 
-            // 2. Category Donut Chart
             const catStats = {};
             currentData.forEach(c => {
                 const cat = c.category || '기타';
@@ -832,7 +1015,6 @@
                 }
             });
 
-            // 3. Member Rankings Chart
             const periodText = selectedYear === 'ALL' ? '전체 기간' : (selectedMonth === 'ALL' ? `${selectedYear}년 전체` : `${selectedYear}년 ${selectedMonth}월`);
             document.getElementById('chart-members-title').innerText = `팀원별 배분 환산실적 순위 (사업부장 제외 팀원) - [${periodText}]`;
 
@@ -911,7 +1093,7 @@
             });
         }
 
-        // ================= 2. TABLE & SEARCH FILTER =================
+        // ================= 2. TABLE =================
         function getFilteredContracts() {
             const search = document.getElementById('filter-search').value.toLowerCase().trim();
             const periodVal = document.getElementById('filter-period').value;
@@ -1008,7 +1190,7 @@
         function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
         function nextPage() { currentPage++; renderTable(); }
 
-        // ================= 3. MEMBERS PERFORMANCE TAB =================
+        // ================= 3. MEMBERS =================
         function renderMemberSelect() {
             const select = document.getElementById('member-select');
             select.innerHTML = TEAM_MEMBERS.map(m => `<option value="${m}">${m}</option>`).join('');
@@ -1086,7 +1268,7 @@
             document.getElementById('mem-kpi-avg-rate').innerText = `${actualAvgRate}%`;
         }
 
-        // ================= MODAL & 100% VALIDATION =================
+        // ================= CRUD (FIREBASE + LOCAL) =================
         function openContractModal(isEdit = false) {
             document.getElementById('contract-modal').classList.remove('hidden');
             if (!isEdit) {
@@ -1154,10 +1336,9 @@
             }
         }
 
-        function handleSaveContract(e) {
+        async function handleSaveContract(e) {
             e.preventDefault();
 
-            // 1. Calculate sum of contribution rates
             const rows = document.querySelectorAll('#modal-contributions-list .contrib-row');
             let sumRate = 0;
             const contributions = [];
@@ -1176,7 +1357,6 @@
                 }
             });
 
-            // 2. Strict 100% Validation Check
             if (Math.abs(sumRate - 100) > 0.001) {
                 alert(`⚠️ 기여율 합계가 100%가 되어야 합니다.\n(현재 입력 합계: ${sumRate.toFixed(1)}%)`);
                 return;
@@ -1185,7 +1365,7 @@
             const idVal = document.getElementById('form-id').value;
             const conversion = parseFloat(document.getElementById('form-conversion').value) || 0;
 
-            const newContract = {
+            const contractData = {
                 id: idVal ? parseInt(idVal) : (contracts.length > 0 ? Math.max(...contracts.map(c => c.id || 0)) + 1 : 1),
                 corp: document.getElementById('form-corp').value,
                 insured: document.getElementById('form-insured').value,
@@ -1202,11 +1382,26 @@
                 contributions: contributions
             };
 
+            // If Firebase is active, save to cloud!
+            if (db && isFirebaseConnected) {
+                try {
+                    const docRef = db.collection('contracts').doc(String(contractData.id));
+                    await docRef.set(contractData);
+                    closeContractModal();
+                    alert('☁️ Firebase 클라우드에 실시간 저장되었습니다!');
+                    return;
+                } catch (err) {
+                    console.error('Firebase save error:', err);
+                    alert('클라우드 저장 실패: ' + err.message + '\n(로컬에 저장합니다.)');
+                }
+            }
+
+            // Local fallback
             if (idVal) {
                 const idx = contracts.findIndex(c => c.id === parseInt(idVal));
-                if (idx !== -1) contracts[idx] = newContract;
+                if (idx !== -1) contracts[idx] = contractData;
             } else {
-                contracts.unshift(newContract);
+                contracts.unshift(contractData);
             }
 
             saveToLocalStorage();
@@ -1246,19 +1441,30 @@
             openContractModal(true);
         }
 
-        function deleteContract(id) {
-            if (confirm(`정말로 No.${id} 계약 정보를 삭제하시겠습니까?`)) {
-                contracts = contracts.filter(c => c.id !== id);
-                saveToLocalStorage();
-                renderTable();
-                renderDashboard();
-                renderMemberDetail();
+        async function deleteContract(id) {
+            if (!confirm(`정말로 No.${id} 계약 정보를 삭제하시겠습니까?`)) return;
+
+            if (db && isFirebaseConnected) {
+                try {
+                    await db.collection('contracts').doc(String(id)).delete();
+                    alert('☁️ Firebase 클라우드에서 삭제되었습니다.');
+                    return;
+                } catch (err) {
+                    console.error('Firebase delete error:', err);
+                    alert('클라우드 삭제 실패: ' + err.message);
+                }
             }
+
+            contracts = contracts.filter(c => c.id !== id);
+            saveToLocalStorage();
+            renderTable();
+            renderDashboard();
+            renderMemberDetail();
         }
 
-        // ================= DATA IMPORT & RECOVERY (데이타 불러오기) =================
+        // ================= EXCEL EXPORTS & IMPORTS =================
         function triggerDataImport() {
-            const confirmImport = confirm("⚠️ 기존 데이터를 불러오면 현재 데이터가 기존 데이터로 변경됩니다.\n계속 진행하시겠습니까?");
+            const confirmImport = confirm("⚠️ 엑셀 데이터를 불러오면 현재 데이터가 엑셀 데이터로 교체/복구됩니다.\n계속 진행하시겠습니까?");
             if (confirmImport) {
                 document.getElementById('excel-file-input').click();
             }
@@ -1269,7 +1475,7 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = async function(evt) {
                 try {
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
@@ -1282,7 +1488,6 @@
                         return;
                     }
 
-                    // Identify members from header row
                     let memberColsMap = {};
                     let headerRow = rows[0];
                     let foundMembers = [];
@@ -1296,7 +1501,6 @@
                     }
 
                     const importedContracts = [];
-                    // Data rows start from row index 2
                     for (let r = 2; r < rows.length; r++) {
                         let row = rows[r];
                         let corp = String(row[0] || '').trim();
@@ -1328,7 +1532,6 @@
                             }
                         });
 
-                        // Find remark & feedback
                         let remarkCol = 10 + (foundMembers.length * 2);
                         let feedbackCol = remarkCol + 1;
                         let remark = String(row[remarkCol] || '').trim();
@@ -1359,22 +1562,30 @@
 
                     contracts = importedContracts;
                     saveToLocalStorage();
+
+                    if (db && isFirebaseConnected && confirm("불러온 데이터를 Firebase 클라우드에도 즉시 동기화할까요?")) {
+                        const batch = db.batch();
+                        contracts.forEach(c => {
+                            batch.set(db.collection('contracts').doc(String(c.id)), c);
+                        });
+                        await batch.commit();
+                    }
+
                     initAllFilters();
                     renderDashboard();
                     renderTable();
                     renderMemberDetail();
-                    alert(`✅ 총 ${contracts.length}건의 데이터가 성공적으로 복구/불러오기 되었습니다!`);
+                    alert(`✅ 총 ${contracts.length}건의 데이터가 성공적으로 불러와졌습니다!`);
                 } catch (err) {
                     console.error(err);
-                    alert('파일을 처리하는 중 오류가 발생했습니다: ' + err.message);
+                    alert('파일 처리 오류: ' + err.message);
                 } finally {
-                    e.target.value = ''; // Reset input
+                    e.target.value = '';
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // ================= EXCEL EXPORTS (SheetJS) =================
         function exportToExcel(onlyFiltered = false) {
             const targetContracts = onlyFiltered ? getFilteredContracts() : contracts;
             if (targetContracts.length === 0) {
@@ -1383,24 +1594,17 @@
             }
 
             const exportData = [];
-
-            // Build Header
             const headerRow1 = ['법인명', '피보험자', '업적반영月', '계약일', '구분', '상품', '보험료', '환산', '시책', '리베이트'];
-            TEAM_MEMBERS.forEach(m => {
-                headerRow1.push(m, '');
-            });
+            TEAM_MEMBERS.forEach(m => { headerRow1.push(m, ''); });
             headerRow1.push('비고', '피드백');
 
             const headerRow2 = ['', '', '', '', '', '', '', '', '', ''];
-            TEAM_MEMBERS.forEach(() => {
-                headerRow2.push('기여율', '환산');
-            });
+            TEAM_MEMBERS.forEach(() => { headerRow2.push('기여율', '환산'); });
             headerRow2.push('', '');
 
             exportData.push(headerRow1);
             exportData.push(headerRow2);
 
-            // Populate rows
             targetContracts.forEach(c => {
                 const row = [
                     c.corp || '',
@@ -1428,7 +1632,7 @@
 
                 row.push(c.remark || '', c.feedback || '');
                 exportData.push(row);
-            });
+            }});
 
             const ws = XLSX.utils.aoa_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
@@ -1514,16 +1718,15 @@
             XLSX.writeFile(wb, `${memberName}_기여율보고서_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        // Register Service Worker for PWA App Installation
+        // Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA Service Worker registered:', reg.scope))
-                    .catch(err => console.log('Service Worker registration failed:', err));
+                    .then(reg => console.log('PWA Service Worker registered'))
+                    .catch(err => console.log('Service Worker failed:', err));
             });
         }
 
-        // PWA Install Prompt Event
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -1536,16 +1739,12 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the PWA install prompt');
-                    }
                     deferredPrompt = null;
                 });
             } else {
                 alert('스마트폰 브라우저 메뉴(⋮ 또는 공유버튼)에서 "홈 화면에 추가" 또는 "앱 설치"를 선택해주세요!');
             }
         }
-
     </script>
 </body>
 </html>
