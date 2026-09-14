@@ -329,7 +329,6 @@
                     </button>
                 </div>
 
-                <!-- KPI Metric Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-slate-100">
                     <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200">
                         <span class="text-xs text-slate-500 font-semibold">참여 계약 건수</span>
@@ -727,6 +726,24 @@
             return val > 0 ? (val + '차월') : '1차월';
         }
 
+        // 팀원 목록 자체를 항상 사업부장님 -> 재직자 차월 높은순 -> 비활성자 하단으로 강제 정렬
+        function sortTeamMembersList(list) {
+            return list.sort((a, b) => {
+                if (a.name === '사업부장님') return -1;
+                if (b.name === '사업부장님') return 1;
+
+                const aActive = a.active !== false ? 1 : 0;
+                const bActive = b.active !== false ? 1 : 0;
+                if (aActive !== bActive) return bActive - aActive; // 재직자 우선
+
+                const tenureA = getTenureValue(a.joinMonth);
+                const tenureB = getTenureValue(b.joinMonth);
+                if (tenureB !== tenureA) return tenureB - tenureA; // 차월 높은 순
+
+                return (a.name || '').localeCompare(b.name || '');
+            });
+        }
+
         // 계약 등록 시 사용되는 재직(활성) 팀원 목록 (차월 높은 순 정렬)
         function getActiveMemberNames() {
             const activeMembers = teamMembersList.filter(m => m.active !== false);
@@ -740,14 +757,12 @@
             return sorted.map(m => m.name);
         }
 
-        // [핵심 1] 팀원별 실적조회 드롭다운용 정렬 목록 생성
-        // 사업부장님 우선 -> 재직자 차월 높은순 -> 비활성 팀원(퇴사, 해촉 등) 하단 배치
+        // [팀원별 실적조회 드롭다운용] 사업부장님 우선 -> 재직자 차월 높은순 -> 비활성자 하단
         function getSortedMembersForPerformanceSelect() {
             const activeList = [];
             const inactiveList = [];
             const processedNames = new Set();
 
-            // 팀원 관리 목록에 등록된 팀원 분류
             teamMembersList.forEach(m => {
                 processedNames.add(m.name);
                 if (m.active !== false) {
@@ -757,7 +772,6 @@
                 }
             });
 
-            // 과거 계약에는 남아있으나 팀원 관리 목록에서 지워진 기타 이름들
             contracts.forEach(c => {
                 (c.contributions || []).forEach(con => {
                     if (con.name && !processedNames.has(con.name)) {
@@ -773,7 +787,6 @@
                 });
             });
 
-            // 재직자 정렬: 사업부장님 맨 위 -> 차월 높은 순(내림차순) -> 이름 가나다순
             activeList.sort((a, b) => {
                 if (a.name === '사업부장님') return -1;
                 if (b.name === '사업부장님') return 1;
@@ -783,7 +796,6 @@
                 return (a.name || '').localeCompare(b.name || '');
             });
 
-            // 비활성자 정렬: 차월 높은 순 -> 이름 가나다순
             inactiveList.sort((a, b) => {
                 const tenureA = getTenureValue(a.joinMonth);
                 const tenureB = getTenureValue(b.joinMonth);
@@ -795,12 +807,8 @@
         }
 
         function getAllKnownMemberNames() {
-            const set = new Set();
-            teamMembersList.forEach(m => set.add(m.name));
-            contracts.forEach(c => {
-                (c.contributions || []).forEach(con => set.add(con.name));
-            });
-            return [...set].filter(Boolean);
+            const { activeList, inactiveList } = getSortedMembersForPerformanceSelect();
+            return [...activeList.map(m => m.name), ...inactiveList.map(m => m.name)];
         }
 
         function getContractPerfMonth(c) {
@@ -899,7 +907,7 @@
                         });
 
                         if (loadedMembers.length > 0) {
-                            teamMembersList = loadedMembers;
+                            teamMembersList = sortTeamMembersList(loadedMembers);
                             saveTeamMembersToStorage();
                             initAllFilters();
                             renderMemberSelect();
@@ -923,14 +931,14 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        teamMembersList = parsed;
+                        teamMembersList = sortTeamMembersList(parsed);
                         return;
                     }
                 }
             } catch (e) {
                 console.warn('Member storage error:', e);
             }
-            teamMembersList = JSON.parse(JSON.stringify(DEFAULT_MEMBERS));
+            teamMembersList = sortTeamMembersList(JSON.parse(JSON.stringify(DEFAULT_MEMBERS)));
             saveTeamMembersToStorage();
         }
 
@@ -1088,6 +1096,7 @@
                 } else {
                     teamMembersList.push(memberData);
                 }
+                teamMembersList = sortTeamMembersList(teamMembersList);
                 saveTeamMembersToStorage();
                 closeMemberModal();
                 initAllFilters();
@@ -1129,7 +1138,7 @@
             }
         }
 
-        // [핵심 2] 팀원 관리 화면: 재직중인 사람은 차월수 높은 순서대로 상단, 비활성 팀원은 하단 배치
+        // [팀원 관리 테이블] 재직자 차월 높은순 상단 -> 비활성자 하단
         function renderMemberMgmtTable() {
             const tbody = document.getElementById('member-mgmt-table-body');
             const countBadge = document.getElementById('member-mgmt-count-badge');
@@ -1143,24 +1152,7 @@
                 return;
             }
 
-            const sortedList = [...teamMembersList].sort((a, b) => {
-                // 사업부장님 최상단 고정
-                if (a.name === '사업부장님') return -1;
-                if (b.name === '사업부장님') return 1;
-
-                const aActive = a.active !== false ? 1 : 0;
-                const bActive = b.active !== false ? 1 : 0;
-                
-                // 1순위: 재직중(active=1)인 사람 우선
-                if (aActive !== bActive) return bActive - aActive;
-
-                // 2순위: 재직중/비활성 그룹 내부에서 각각 차월수가 높은 순(내림차순) 정렬
-                const tenureDiff = getTenureValue(b.joinMonth) - getTenureValue(a.joinMonth);
-                if (tenureDiff !== 0) return tenureDiff;
-
-                // 3순위: 차월이 같으면 이름순
-                return (a.name || '').localeCompare(b.name || '');
-            });
+            const sortedList = sortTeamMembersList([...teamMembersList]);
 
             tbody.innerHTML = sortedList.map((m, idx) => {
                 const isLeader = m.name === '사업부장님';
@@ -1590,6 +1582,7 @@
             return Math.round(r).toLocaleString() + '만원';
         }
 
+        // [핵심 1 해결] No 번호를 최신 체결일 기준으로 1번부터 차례대로 매기기
         function renderTable() {
             const filtered = getFilteredContracts();
             const countEl = document.getElementById('table-total-count');
@@ -1616,7 +1609,8 @@
             }
 
             tbody.innerHTML = pageData.map((c, idx) => {
-                const globalIdx = filtered.length - (start + idx);
+                // 👈 최신 계약일자가 맨 위(1번)가 되도록 순번 부여
+                const rowNo = start + idx + 1;
                 const pYear = getContractPerfYear(c);
                 const pMonth = getContractPerfMonth(c);
                 const cYear = c.date && c.date.length >= 4 ? c.date.substring(0, 4) : pYear;
@@ -1638,7 +1632,7 @@
                 const rebText = formatRebateDisplay(c.rebate);
 
                 return '<tr class="hover:bg-slate-50 transition border-b border-slate-100">' +
-                    '<td class="py-2.5 px-3 text-center text-slate-400 font-mono">' + (c.id || globalIdx) + '</td>' +
+                    '<td class="py-2.5 px-3 text-center font-bold text-slate-700 font-mono">' + rowNo + '</td>' +
                     '<td class="py-2.5 px-3 whitespace-nowrap">' + perfBadge + '</td>' +
                     '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">' + (c.date || '-') + '</td>' +
                     '<td class="py-2.5 px-4 font-bold text-slate-800">' + (c.corp || '-') + ' <span class="font-normal text-slate-400 text-[11px]">(' + (c.insured || '-') + ')</span></td>' +
@@ -1670,7 +1664,7 @@
         function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
         function nextPage() { currentPage++; renderTable(); }
 
-        // [핵심 1 적용] 팀원별 실적조회 드롭다운 렌더링 (차월 높은 순, 비활성 하단 배치)
+        // [팀원별 실적조회 드롭다운 렌더링]
         function renderMemberSelect() {
             const select = document.getElementById('member-select');
             if (!select) return;
@@ -1679,14 +1673,12 @@
             const { activeList, inactiveList } = getSortedMembersForPerformanceSelect();
 
             let html = '';
-            // 1. 재직 팀원 (차월수 높은 순)
             activeList.forEach(m => {
                 const tenure = calculateTenureMonths(m.joinMonth);
                 const label = m.name === '사업부장님' ? m.name : `${m.name} (${tenure})`;
                 html += `<option value="${m.name}">${label}</option>`;
             });
 
-            // 2. 비활성 팀원 구분선 및 하단 배치
             if (inactiveList.length > 0) {
                 html += `<option disabled class="bg-slate-200 text-slate-500 font-bold">────────── 비활성(퇴사/해촉) ──────────</option>`;
                 inactiveList.forEach(m => {
@@ -1749,7 +1741,7 @@
                     const pMonth = getContractPerfMonth(c);
 
                     return '<tr class="hover:bg-slate-50 transition border-b border-slate-100">' +
-                        '<td class="py-2.5 px-3 text-center text-slate-400 font-mono">' + (idx + 1) + '</td>' +
+                        '<td class="py-2.5 px-3 text-center text-slate-700 font-mono font-bold">' + (idx + 1) + '</td>' +
                         '<td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">' + pYear + '년 ' + pMonth + '월</td>' +
                         '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">' + (c.date || '-') + '</td>' +
                         '<td class="py-2.5 px-4 font-bold text-slate-800">' + (c.corp || '-') + ' <span class="font-normal text-slate-400 text-[11px]">(' + (c.insured || '-') + ')</span></td>' +
