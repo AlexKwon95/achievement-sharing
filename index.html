@@ -53,6 +53,7 @@
     <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between py-2.5 md:py-0 md:h-16 gap-2">
+                <!-- Brand Title -->
                 <div class="flex items-center space-x-2.5">
                     <div class="bg-blue-600 p-1.5 sm:p-2 rounded-lg text-white font-bold flex items-center justify-center shadow-md shadow-blue-500/30 flex-shrink-0">
                         <i data-lucide="pie-chart" class="w-4 h-4 sm:w-5 sm:h-5"></i>
@@ -70,6 +71,7 @@
                     </div>
                 </div>
 
+                <!-- Navigation Tabs -->
                 <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 md:pb-0 custom-scrollbar flex-shrink-0 items-center">
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium bg-blue-600 text-white flex items-center gap-1.5 whitespace-nowrap transition shadow-sm">
                         <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
@@ -96,6 +98,7 @@
         </div>
     </header>
 
+    <!-- Hidden File Input for Excel Import -->
     <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleFileImport(event)">
 
     <!-- Main Container -->
@@ -109,13 +112,16 @@
                         <label class="text-xs font-bold text-slate-600 flex items-center gap-1 whitespace-nowrap">
                             <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-600"></i> 업적 기준년도:
                         </label>
-                        <select id="dash-year-select" onchange="onDashYearChange()" class="text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-slate-800"></select>
+                        <select id="dash-year-select" onchange="onDashYearChange()" class="text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-slate-800">
+                        </select>
                     </div>
+
                     <div class="flex items-center gap-1.5">
                         <label class="text-xs font-bold text-slate-600 flex items-center gap-1 whitespace-nowrap">
                             <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-indigo-600"></i> 업적반영:
                         </label>
-                        <select id="dash-month-select" onchange="renderDashboard()" class="text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-slate-800"></select>
+                        <select id="dash-month-select" onchange="renderDashboard()" class="text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-slate-800">
+                        </select>
                     </div>
                 </div>
 
@@ -210,7 +216,7 @@
                             <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
                             <span id="chart-members-title">팀원별 배분 환산실적 순위 (사업부장 제외 팀원)</span>
                         </h3>
-                        <span class="text-[11px] text-slate-400">* 바에 마우스를 올리면 팀원별 환산액 및 기여 비중(%)이 표시됩니다.</span>
+                        <span class="text-[11px] text-slate-400">* 바에 마우스를 올리면 팀원별 환산액 및 연간 총환산 대비 기여 비중(%)이 표시됩니다.</span>
                     </div>
                     <div id="chart-members-container" class="w-full" style="min-height: 480px;">
                         <canvas id="chart-members"></canvas>
@@ -219,7 +225,7 @@
             </div>
         </section>
 
-        <!-- 2. CONTRACT LIST TAB -->
+        <!-- 2. CONTRACT LIST & MANAGEMENT TAB -->
         <section id="tab-list" class="space-y-4 hidden">
             <div class="bg-white p-3.5 sm:p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
@@ -232,7 +238,8 @@
                     </div>
                     <div>
                         <label class="text-xs font-semibold text-slate-500 block mb-1">업적 반영 기간 (전체/연도/월간)</label>
-                        <select id="filter-period" onchange="renderTable()" class="w-full text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"></select>
+                        <select id="filter-period" onchange="renderTable()" class="w-full text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50">
+                        </select>
                     </div>
                     <div>
                         <label class="text-xs font-semibold text-slate-500 block mb-1">계약 구분</label>
@@ -267,6 +274,7 @@
                 </div>
             </div>
 
+            <!-- Table Card -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse text-xs">
@@ -286,7 +294,8 @@
                                 <th class="py-3 px-3 text-center w-20 whitespace-nowrap">관리</th>
                             </tr>
                         </thead>
-                        <tbody id="table-body" class="divide-y divide-slate-100 text-slate-600 font-normal"></tbody>
+                        <tbody id="table-body" class="divide-y divide-slate-100 text-slate-600 font-normal">
+                        </tbody>
                     </table>
                 </div>
                 <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
@@ -306,11 +315,13 @@
                     <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-bold text-slate-700 whitespace-nowrap">팀원 선택:</label>
-                            <select id="member-select" onchange="renderMemberDetail()" class="text-xs font-bold border border-blue-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-blue-50 text-blue-900"></select>
+                            <select id="member-select" onchange="renderMemberDetail()" class="text-xs font-bold border border-blue-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-blue-50 text-blue-900">
+                            </select>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-bold text-slate-700 whitespace-nowrap">조회 기간:</label>
-                            <select id="member-period-select" onchange="renderMemberDetail()" class="text-xs font-semibold border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-slate-800"></select>
+                            <select id="member-period-select" onchange="renderMemberDetail()" class="text-xs font-semibold border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-slate-800">
+                            </select>
                         </div>
                     </div>
                     <button onclick="exportMemberReport()" class="inline-flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm transition">
@@ -323,6 +334,7 @@
                         <span class="text-xs text-slate-500 font-semibold">참여 계약 건수</span>
                         <h4 id="mem-kpi-count" class="text-xl sm:text-2xl font-bold text-slate-800 mt-1">0 건</h4>
                     </div>
+
                     <div class="bg-blue-50/40 p-3.5 sm:p-4 rounded-xl border border-blue-200">
                         <div class="text-xs font-semibold flex items-center gap-1 flex-wrap">
                             <span class="text-blue-600 font-bold">팀원 배분 환산액</span>
@@ -335,6 +347,7 @@
                             <span id="mem-kpi-total-conv" class="text-lg sm:text-xl font-extrabold text-slate-900">0 원</span>
                         </div>
                     </div>
+
                     <div class="bg-emerald-50/40 p-3.5 sm:p-4 rounded-xl border border-emerald-200">
                         <span class="text-xs text-emerald-700 font-semibold">평균 기여율 (실제 기여 비중)</span>
                         <h4 id="mem-kpi-avg-rate" class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">0.0%</h4>
@@ -365,8 +378,10 @@
                                 <th class="py-3 px-4 whitespace-nowrap">함께한 팀원</th>
                             </tr>
                         </thead>
-                        <tbody id="member-table-body" class="divide-y divide-slate-100 text-slate-600"></tbody>
-                        <tfoot id="member-table-footer" class="bg-slate-100 font-bold text-slate-800 border-t-2 border-slate-300"></tfoot>
+                        <tbody id="member-table-body" class="divide-y divide-slate-100 text-slate-600">
+                        </tbody>
+                        <tfoot id="member-table-footer" class="bg-slate-100 font-bold text-slate-800 border-t-2 border-slate-300">
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -384,7 +399,7 @@
                             팀원 정보 관리
                             <span id="member-mgmt-count-badge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700">총 0명</span>
                         </h2>
-                        <p class="text-[11px] text-slate-500">신규 팀원을 등록하고 재직 상태(재직/퇴사/해촉/기타)를 관리합니다.</p>
+                        <p class="text-[11px] text-slate-500">신규 팀원을 등록하고 차월 및 사번/생년월일 정보를 관리합니다.</p>
                     </div>
                 </div>
 
@@ -398,10 +413,10 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-3.5 sm:p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <i data-lucide="list" class="w-4 h-4 text-blue-600"></i> 팀원 명단 및 재직 현황
+                        <i data-lucide="list" class="w-4 h-4 text-blue-600"></i> 팀원 명단 및 재직 차월 현황
                     </span>
-                    <span class="text-[11px] text-slate-400">
-                        * 비활성화(퇴사/해촉/기타)된 팀원은 목록 하단에 회색 음영으로 정렬됩니다.
+                    <span class="text-[11px] text-slate-400 leading-relaxed">
+                        * 차월은 입사월을 기준으로 현재 시점까지 경과된 개월 수가 자동 카운트됩니다.
                     </span>
                 </div>
 
@@ -419,7 +434,8 @@
                                 <th class="py-3 px-4 text-center w-24 whitespace-nowrap">관리</th>
                             </tr>
                         </thead>
-                        <tbody id="member-mgmt-table-body" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                        <tbody id="member-mgmt-table-body" class="divide-y divide-slate-100 text-slate-600">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -428,7 +444,7 @@
 
     <!-- MODAL: ADD / EDIT CONTRACT -->
     <div id="contract-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 sm:p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
             <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
                 <h3 id="modal-title" class="text-sm sm:text-base font-bold flex items-center gap-2">
                     <i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> 신규 계약 등록
@@ -438,6 +454,7 @@
 
             <form id="contract-form" onsubmit="handleSaveContract(event)" class="p-4 sm:p-6 overflow-y-auto custom-scrollbar space-y-3.5 sm:space-y-4 flex-1 text-xs">
                 <input type="hidden" id="form-id">
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="font-semibold text-slate-700 block mb-1">법인명 *</label>
@@ -502,11 +519,11 @@
                     </div>
                     <div>
                         <label class="font-semibold text-slate-700 block mb-1">시책 (%)</label>
-                        <input type="number" step="any" id="form-promotion" value="0" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-right font-medium">
+                        <input type="number" step="any" id="form-promotion" value="0" placeholder="예: 500" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-right font-medium">
                     </div>
                     <div>
                         <label class="font-semibold text-slate-700 block mb-1">리베이트 (만원)</label>
-                        <input type="number" step="any" id="form-rebate" value="0" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-right font-medium">
+                        <input type="number" step="any" id="form-rebate" value="0" placeholder="예: 200" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-right font-medium">
                     </div>
                 </div>
 
@@ -521,7 +538,10 @@
                         </div>
                     </div>
                     <p class="text-[11px] text-slate-400 mb-3">참여한 팀원의 기여율(%)을 입력하세요. <b>기여율 합계가 정확히 100%가 되어야 저장이 가능합니다.</b></p>
-                    <div id="modal-contributions-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
+
+                    <div id="modal-contributions-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                    </div>
+
                     <button type="button" onclick="addContributionRow()" class="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
                         <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + 참여 팀원 추가
                     </button>
@@ -546,9 +566,9 @@
         </div>
     </div>
 
-    <!-- MODAL: ADD / EDIT TEAM MEMBER (비활성 사유 선택 옵션 탑재) -->
+    <!-- MODAL: ADD / EDIT TEAM MEMBER -->
     <div id="member-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 sm:p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-150">
             <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
                 <h3 id="member-modal-title" class="text-sm sm:text-base font-bold flex items-center gap-2">
                     <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i> 신규 팀원 등록
@@ -558,10 +578,12 @@
 
             <form id="member-form" onsubmit="handleSaveMember(event)" class="p-5 space-y-4 text-xs">
                 <input type="hidden" id="mem-form-id">
+
                 <div>
                     <label class="font-bold text-slate-700 block mb-1">팀원 이름 *</label>
                     <input type="text" id="mem-form-name" required placeholder="예: 홍길동" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="font-semibold text-slate-700 block mb-1">사번</label>
@@ -572,32 +594,14 @@
                         <input type="date" id="mem-form-birth" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                 </div>
+
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="font-bold text-slate-700">입사년월 (차월 계산 기준) *</label>
                         <span id="mem-calc-tenure-badge" class="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-[11px]">-</span>
                     </div>
                     <input type="month" id="mem-form-join" required onchange="updateMemberModalTenurePreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                <!-- 비활성 상태 설정 박스 -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <label class="font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
-                            <input type="checkbox" id="mem-form-inactive" onchange="toggleInactiveReasonField()" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
-                            <span>팀원 상태 비활성화</span>
-                        </label>
-                        <span class="text-[10px] text-slate-400">체크 해제 시 [재직중] 유지</span>
-                    </div>
-
-                    <div id="inactive-reason-box" class="hidden pt-2 border-t border-slate-200">
-                        <label class="font-semibold text-slate-600 block mb-1">비활성화 사유 선택 *</label>
-                        <select id="mem-form-reason" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700">
-                            <option value="퇴사">퇴사</option>
-                            <option value="해촉">해촉</option>
-                            <option value="기타">기타</option>
-                        </select>
-                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">* 입사월 기준으로 현재까지의 재직 개월 수(차월)가 자동 계산됩니다.</p>
                 </div>
 
                 <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
@@ -610,6 +614,7 @@
 
     <!-- Core Script -->
     <script>
+        // FIREBASE CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyAUQ85WeSMJKMzej5Nft3Ql-CmvWRNctlE",
             authDomain: "achievement-sharing.firebaseapp.com",
@@ -629,65 +634,30 @@
                 isFirebaseInitialized = true;
             }
         } catch (e) {
-            console.warn("Firebase Init Notice:", e);
+            console.warn("Firebase 초기화 알림:", e);
         }
 
-        const ORDERED_MEMBER_NAMES = [
-            "사업부장님",
-            "김은경",
-            "맹주석",
-            "권상헌",
-            "김상우",
-            "이중인",
-            "고은영",
-            "정형도",
-            "전현수",
-            "홍종보",
-            "김정미",
-            "김기만",
-            "신남수",
-            "김경호",
-            "김희태",
-            "이다운",
-            "송준범"
+        // Default Initial Team Members Structure
+        const DEFAULT_MEMBERS = [
+            {"id": "m_leader", "name": "사업부장님", "empId": "M001", "joinMonth": "2020-01", "birthDate": "", "active": true},
+            {"id": "m_1", "name": "전현수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_2", "name": "정형도", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_3", "name": "홍종보", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_4", "name": "맹주석", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_5", "name": "권상헌", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_6", "name": "김상우", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_7", "name": "김정미", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_8", "name": "김은경", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_9", "name": "김경호", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_10", "name": "송준범", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_11", "name": "김기만", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_12", "name": "김희태", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_13", "name": "고은영", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_14", "name": "신남수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
+            {"id": "m_15", "name": "이다운", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true}
         ];
 
-        function sortMembersByCustomOrder(nameList) {
-            const list = Array.from(new Set(nameList.filter(Boolean)));
-            return list.sort((a, b) => {
-                const idxA = ORDERED_MEMBER_NAMES.indexOf(a);
-                const idxB = ORDERED_MEMBER_NAMES.indexOf(b);
-                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                if (idxA !== -1) return -1;
-                if (idxB !== -1) return 1;
-                return a.localeCompare(b, 'ko');
-            });
-        }
-
-        const RAW_INITIAL_DATA = [
-            {"id": 1, "corp": "천안센텀정형외과", "insured": "10명", "month": "10", "date": "2025-09-30", "category": "단체", "product": "기업재해보장보험 1종(100%,10년)", "premium": 585084.0, "conversion": 303765.0, "promotion": 0, "rebate": 1.0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 121506.0}, {"name": "전현수", "rate": 0.01, "amount": 3037.65}, {"name": "맹주석", "rate": 0.3, "amount": 91129.5}, {"name": "권상헌", "rate": 0.15, "amount": 45564.75}, {"name": "김정미", "rate": 0.15, "amount": 45564.75}], "remark": "", "feedback": ""},
-            {"id": 2, "corp": "㈜한도", "insured": "김종원", "month": "10", "date": "2025-10-14", "category": "정기", "product": "CEO보장정기보험", "premium": 5129750.0, "conversion": 5899212.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 4719369.6}, {"name": "맹주석", "rate": 0.1, "amount": 589921.2}, {"name": "권상헌", "rate": 0.05, "amount": 294960.6}, {"name": "김정미", "rate": 0.05, "amount": 294960.6}], "remark": "", "feedback": ""},
-            {"id": 3, "corp": "㈜한도", "insured": "김종원", "month": "10", "date": "2025-10-14", "category": "정기", "product": "CEO보장정기보험", "premium": 5129750.0, "conversion": 5899212.0, "promotion": 500.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 4719369.6}, {"name": "맹주석", "rate": 0.1, "amount": 589921.2}, {"name": "권상헌", "rate": 0.05, "amount": 294960.6}, {"name": "김정미", "rate": 0.05, "amount": 294960.6}], "remark": "", "feedback": ""},
-            {"id": 4, "corp": "에프엔에스테크㈜", "insured": "5명", "month": "10", "date": "2025-10-14", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 307950.0, "conversion": 263175.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 131587.5}, {"name": "김은경", "rate": 0.5, "amount": 131587.5}], "remark": "", "feedback": ""},
-            {"id": 5, "corp": "에프엔에스테크㈜", "insured": "3명", "month": "10", "date": "2025-10-14", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 164210.0, "conversion": 180614.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.6, "amount": 108368.4}, {"name": "정형도", "rate": 0.4, "amount": 72245.6}], "remark": "", "feedback": ""},
-            {"id": 6, "corp": "에프엔에스테크㈜", "insured": "1명", "month": "10", "date": "2025-10-29", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 49190.0, "conversion": 43818.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.5, "amount": 21909.0}, {"name": "맹주석", "rate": 0.5, "amount": 21909.0}], "remark": "", "feedback": ""},
-            {"id": 7, "corp": "㈜글로벤스", "insured": "19명", "month": "10", "date": "2025-10-24", "category": "단체", "product": "기업재해보장보험 1종(60%,10년)", "premium": 406490.0, "conversion": 449274.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.4, "amount": 179709.6}, {"name": "김은경", "rate": 0.3, "amount": 134782.2}, {"name": "송준범", "rate": 0.3, "amount": 134782.2}], "remark": "", "feedback": ""},
-            {"id": 8, "corp": "㈜에이디텍건축사무소", "insured": "36명", "month": "10", "date": "2025-10-29", "category": "단체", "product": "기업재해보장보험 1종(40%,10년)", "premium": 893578.0, "conversion": 977093.0, "promotion": 0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 781674.4}, {"name": "맹주석", "rate": 0.05, "amount": 48854.65}, {"name": "권상헌", "rate": 0.05, "amount": 48854.65}, {"name": "김경호", "rate": 0.1, "amount": 97709.3}], "remark": "", "feedback": ""},
-            {"id": 9, "corp": "㈜에스비딤채", "insured": "이재홍", "month": "10", "date": "2025-10-27", "category": "종신", "product": "더행복종신보험", "premium": 3225000.0, "conversion": 1773750.0, "promotion": 300.0, "rebate": 0, "contributions": [{"name": "사업부장님", "rate": 0.7, "amount": 1241625.0}, {"name": "맹주석", "rate": 0.1, "amount": 177375.0}, {"name": "송준범", "rate": 0.1, "amount": 177375.0}, {"name": "김기만", "rate": 0.1, "amount": 177375.0}], "remark": "", "feedback": ""},
-            {"id": 10, "corp": "㈜대림엠이씨", "insured": "이민규", "month": "10", "date": "2025-10-30", "category": "종신", "product": "더행복종신보험", "premium": 3127500.0, "conversion": 1720125.0, "promotion": 300.0, "rebate": 200.0, "contributions": [{"name": "사업부장님", "rate": 1.0, "amount": 1720125.0}], "remark": "", "feedback": ""},
-            {"id": 11, "corp": "개인명의", "insured": "조하나", "month": "10", "date": "2025-10-31", "category": "종신", "product": "더행복종신보험", "premium": 3133600.0, "conversion": 1723480.0, "promotion": 300.0, "rebate": 200.0, "contributions": [{"name": "사업부장님", "rate": 0.8, "amount": 1378784.0}, {"name": "김희태", "rate": 0.1, "amount": 172348.0}, {"name": "고은영", "rate": 0.1, "amount": 172348.0}], "remark": "", "feedback": ""}
-        ];
-
-        const DEFAULT_MEMBERS = ORDERED_MEMBER_NAMES.map((name, idx) => ({
-            id: idx === 0 ? "m_leader" : `m_${idx}`,
-            name: name,
-            empId: idx === 0 ? "M001" : "",
-            joinMonth: idx === 0 ? "2020-01" : "2024-01",
-            birthDate: "",
-            active: true,
-            inactiveReason: ""
-        }));
-
+        // Application State
         let contracts = [];
         let teamMembersList = [];
         let currentPage = 1;
@@ -695,13 +665,6 @@
         let chartMonthly = null;
         let chartCategory = null;
         let chartMembers = null;
-
-        function isValidContract(c) {
-            if (!c) return false;
-            const corp = String(c.corp || '').trim();
-            const product = String(c.product || '').trim();
-            return !(!corp || corp === '-' || product === '월별환산환계');
-        }
 
         function updateSyncStatus(status, text) {
             const badge = document.getElementById('sync-badge');
@@ -711,7 +674,7 @@
                 badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 실시간 연결됨';
             } else if (status === 'local') {
                 badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 로컬 모드';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 로컬 저장소 모드';
             } else {
                 badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1';
                 badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ' + (text || '동기화 대기');
@@ -724,27 +687,27 @@
             const jYear = parseInt(parts[0], 10);
             const jMonth = parseInt(parts[1], 10);
             if (isNaN(jYear) || isNaN(jMonth)) return '-';
+            
             const now = new Date();
-            const diff = (now.getFullYear() - jYear) * 12 + (now.getMonth() + 1 - jMonth) + 1;
+            const curYear = now.getFullYear();
+            const curMonth = now.getMonth() + 1;
+            
+            const diff = (curYear - jYear) * 12 + (curMonth - jMonth) + 1;
             return diff > 0 ? (diff + '차월') : '1차월';
         }
 
-        // 계약 등록 드롭다운용: 재직중인 활동 팀원만 반환
         function getActiveMemberNames() {
             const activeList = teamMembersList.filter(m => m.active !== false).map(m => m.name);
-            const baseList = activeList.length > 0 ? activeList : ORDERED_MEMBER_NAMES;
-            return sortMembersByCustomOrder(baseList);
+            return activeList.length > 0 ? activeList : DEFAULT_MEMBERS.map(m => m.name);
         }
 
-        // 조회/필터용: 과거 이력이 있는 비활성 팀원까지 포함하여 반환 (실적 조회 보장)
         function getAllKnownMemberNames() {
             const set = new Set();
             teamMembersList.forEach(m => set.add(m.name));
             contracts.forEach(c => {
                 (c.contributions || []).forEach(con => set.add(con.name));
             });
-            ORDERED_MEMBER_NAMES.forEach(m => set.add(m));
-            return sortMembersByCustomOrder([...set].filter(Boolean));
+            return [...set].filter(Boolean);
         }
 
         function getContractPerfMonth(c) {
@@ -753,8 +716,12 @@
             }
             if (c.month !== undefined && c.month !== null && String(c.month).trim() !== '') {
                 const str = String(c.month).trim();
-                if (str.includes('-')) return String(parseInt(str.split('-')[1], 10));
-                if (!isNaN(str)) return String(parseInt(str, 10));
+                if (str.includes('-')) {
+                    return String(parseInt(str.split('-')[1], 10));
+                }
+                if (!isNaN(str)) {
+                    return String(parseInt(str, 10));
+                }
             }
             if (c.date && c.date.length >= 7) {
                 return String(parseInt(c.date.substring(5, 7), 10));
@@ -770,7 +737,17 @@
                 return String(c.month).split('-')[0].trim();
             }
             if (c.date && c.date.length >= 7) {
-                return String(parseInt(c.date.substring(0, 4), 10));
+                const contractYear = parseInt(c.date.substring(0, 4), 10);
+                const contractMonth = parseInt(c.date.substring(5, 7), 10);
+                const perfMonth = parseInt(getContractPerfMonth(c), 10);
+
+                if (contractMonth >= 11 && perfMonth <= 2) {
+                    return String(contractYear + 1);
+                }
+                if (contractMonth <= 2 && perfMonth >= 11) {
+                    return String(contractYear - 1);
+                }
+                return String(contractYear);
             }
             return '2026';
         }
@@ -788,52 +765,95 @@
         }
 
         function startApplication() {
-            loadTeamMembersFromStorage();
-            loadFromLocalStorage();
-            initAllFilters();
-            renderDashboard();
-            renderTable();
-            renderMemberSelect();
-            renderMemberMgmtTable();
-            if (window.lucide && lucide.createIcons) lucide.createIcons();
+            try {
+                loadTeamMembersFromStorage();
+                loadFromLocalStorage();
+                initAllFilters();
+                renderDashboard();
+                renderTable();
+                renderMemberSelect();
+                renderMemberMgmtTable();
+                if (window.lucide && lucide.createIcons) lucide.createIcons();
 
-            if (isFirebaseInitialized && db) {
-                db.collection("contracts").onSnapshot((snapshot) => {
-                    const loadedContracts = [];
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        if (isValidContract(data)) {
-                            loadedContracts.push(data);
-                        } else {
-                            doc.ref.delete().catch(()=>{});
+                if (isFirebaseInitialized && db) {
+                    db.collection("contracts").onSnapshot((snapshot) => {
+                        const loadedContracts = [];
+                        snapshot.forEach((doc) => {
+                            loadedContracts.push(doc.data());
+                        });
+
+                        if (loadedContracts.length > 0) {
+                            // 계약일자(date) 최신순(내림차순) 정렬
+                            loadedContracts.sort((a, b) => {
+                                const dateA = a.date || '';
+                                const dateB = b.date || '';
+                                if (dateA !== dateB) {
+                                    return dateB.localeCompare(dateA);
+                                }
+                                return (b.id || 0) - (a.id || 0);
+                            });
+                            contracts = loadedContracts;
+                            saveToLocalStorage();
                         }
+                        
+                        updateSyncStatus('online');
+                        initAllFilters();
+                        renderDashboard();
+                        renderTable();
+                        renderMemberDetail();
+                        renderMemberMgmtTable();
+                    }, (error) => {
+                        console.warn("Firestore contracts warning:", error);
+                        updateSyncStatus('local');
                     });
 
-                    if (loadedContracts.length > 0) {
-                        loadedContracts.sort((a, b) => (b.id || 0) - (a.id || 0));
-                        contracts = loadedContracts;
-                        saveToLocalStorage();
-                    }
-                    updateSyncStatus('online');
-                    initAllFilters();
-                    renderDashboard();
-                    renderTable();
-                    renderMemberDetail();
-                }, () => updateSyncStatus('local'));
+                    db.collection("team_members").onSnapshot((snapshot) => {
+                        const loadedMembers = [];
+                        snapshot.forEach((doc) => {
+                            loadedMembers.push(doc.data());
+                        });
 
-                db.collection("team_members").onSnapshot((snapshot) => {
-                    const loadedMembers = [];
-                    snapshot.forEach((doc) => loadedMembers.push(doc.data()));
-                    if (loadedMembers.length > 0) {
-                        teamMembersList = loadedMembers;
-                        saveTeamMembersToStorage();
-                        initAllFilters();
-                        renderMemberSelect();
-                        renderMemberMgmtTable();
+                        if (loadedMembers.length > 0) {
+                            teamMembersList = loadedMembers;
+                            saveTeamMembersToStorage();
+                            initAllFilters();
+                            renderMemberSelect();
+                            renderMemberMgmtTable();
+                            renderDashboard();
+                        }
+                    }, (error) => {
+                        console.warn("Firestore members warning:", error);
+                    });
+                } else {
+                    updateSyncStatus('local');
+                }
+            } catch (err) {
+                console.error("Application start error:", err);
+            }
+        }
+
+        function loadTeamMembersFromStorage() {
+            try {
+                const saved = localStorage.getItem('gfc_team_members_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        teamMembersList = parsed;
+                        return;
                     }
-                });
-            } else {
-                updateSyncStatus('local');
+                }
+            } catch (e) {
+                console.warn('Member storage error:', e);
+            }
+            teamMembersList = JSON.parse(JSON.stringify(DEFAULT_MEMBERS));
+            saveTeamMembersToStorage();
+        }
+
+        function saveTeamMembersToStorage() {
+            try {
+                localStorage.setItem('gfc_team_members_v2', JSON.stringify(teamMembersList));
+            } catch (e) {
+                console.error('Member save error:', e);
             }
         }
 
@@ -843,33 +863,29 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        contracts = parsed.filter(isValidContract);
-                        saveToLocalStorage();
+                        // 계약일자 최신순 정렬
+                        parsed.sort((a, b) => {
+                            const dateA = a.date || '';
+                            const dateB = b.date || '';
+                            if (dateA !== dateB) return dateB.localeCompare(dateA);
+                            return (b.id || 0) - (a.id || 0);
+                        });
+                        contracts = parsed;
                         return;
                     }
                 }
-            } catch (e) {}
-            contracts = RAW_INITIAL_DATA.filter(isValidContract);
-            saveToLocalStorage();
+            } catch (e) {
+                console.warn('LocalStorage error:', e);
+            }
+            contracts = [];
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('gfc_contracts_data_v3', JSON.stringify(contracts));
-        }
-
-        function loadTeamMembersFromStorage() {
             try {
-                const saved = localStorage.getItem('gfc_team_members_v2');
-                if (saved) {
-                    teamMembersList = JSON.parse(saved);
-                    return;
-                }
-            } catch (e) {}
-            teamMembersList = JSON.parse(JSON.stringify(DEFAULT_MEMBERS));
-        }
-
-        function saveTeamMembersToStorage() {
-            localStorage.setItem('gfc_team_members_v2', JSON.stringify(teamMembersList));
+                localStorage.setItem('gfc_contracts_data_v3', JSON.stringify(contracts));
+            } catch (e) {
+                console.error('Save failed:', e);
+            }
         }
 
         function switchTab(tabId) {
@@ -892,23 +908,199 @@
             if (window.lucide && lucide.createIcons) lucide.createIcons();
         }
 
+        function openMemberModal(isEdit = false, memberId = null) {
+            document.getElementById('member-modal').classList.remove('hidden');
+            const titleEl = document.getElementById('member-modal-title');
+            const form = document.getElementById('member-form');
+            
+            if (!isEdit) {
+                titleEl.innerHTML = '<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i> 신규 팀원 등록';
+                form.reset();
+                document.getElementById('mem-form-id').value = '';
+                document.getElementById('mem-calc-tenure-badge').innerText = '-';
+                const now = new Date();
+                const curY = now.getFullYear();
+                const curM = String(now.getMonth() + 1).padStart(2, '0');
+                document.getElementById('mem-form-join').value = curY + '-' + curM;
+                updateMemberModalTenurePreview();
+            } else {
+                titleEl.innerHTML = '<i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i> 팀원 정보 수정';
+                const member = teamMembersList.find(m => String(m.id) === String(memberId));
+                if (member) {
+                    document.getElementById('mem-form-id').value = member.id;
+                    document.getElementById('mem-form-name').value = member.name || '';
+                    document.getElementById('mem-form-empid').value = member.empId || '';
+                    document.getElementById('mem-form-birth').value = member.birthDate || '';
+                    document.getElementById('mem-form-join').value = member.joinMonth || '';
+                    updateMemberModalTenurePreview();
+                }
+            }
+            if (window.lucide && lucide.createIcons) lucide.createIcons();
+        }
+
+        function closeMemberModal() {
+            document.getElementById('member-modal').classList.add('hidden');
+        }
+
+        function updateMemberModalTenurePreview() {
+            const joinVal = document.getElementById('mem-form-join').value;
+            const badge = document.getElementById('mem-calc-tenure-badge');
+            if (badge) {
+                badge.innerText = '현재 ' + calculateTenureMonths(joinVal);
+            }
+        }
+
+        function handleSaveMember(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('mem-form-id').value;
+            const name = document.getElementById('mem-form-name').value.trim();
+            const empId = document.getElementById('mem-form-empid').value.trim();
+            const birthDate = document.getElementById('mem-form-birth').value;
+            const joinMonth = document.getElementById('mem-form-join').value;
+
+            if (!name) {
+                alert('팀원 이름을 입력해주세요.');
+                return;
+            }
+
+            const memberId = idVal ? idVal : 'mem_' + Date.now();
+            const memberData = {
+                id: memberId,
+                name: name,
+                empId: empId,
+                birthDate: birthDate,
+                joinMonth: joinMonth,
+                active: true
+            };
+
+            if (isFirebaseInitialized && db) {
+                db.collection("team_members").doc(memberId).set(memberData)
+                    .then(() => {
+                        closeMemberModal();
+                        alert('✅ 팀원 정보가 실시간 데이터베이스에 저장되었습니다!');
+                    })
+                    .catch(err => {
+                        alert('저장 실패: ' + err.message);
+                    });
+            } else {
+                if (idVal) {
+                    const idx = teamMembersList.findIndex(m => String(m.id) === String(idVal));
+                    if (idx !== -1) teamMembersList[idx] = memberData;
+                } else {
+                    teamMembersList.push(memberData);
+                }
+                saveTeamMembersToStorage();
+                closeMemberModal();
+                initAllFilters();
+                renderMemberSelect();
+                renderMemberMgmtTable();
+                renderDashboard();
+                alert('✅ 팀원 정보가 성공적으로 등록되었습니다.');
+            }
+        }
+
+        function deleteMember(memberId) {
+            const member = teamMembersList.find(m => String(m.id) === String(memberId));
+            if (!member) return;
+
+            if (member.name === '사업부장님') {
+                alert('사업부장님 계정은 삭제할 수 없습니다.');
+                return;
+            }
+
+            const contractCount = contracts.filter(c => (c.contributions || []).some(con => con.name === member.name)).length;
+            const msg = contractCount > 0 
+                ? '⚠️ [' + member.name + '] 팀원은 총 ' + contractCount + '건의 공동모집 업적 이력이 있습니다.\n\n팀원을 삭제하더라도 기존 계약에 등록된 기여율 및 정산 내역은 안전하게 보존됩니다.\n정말로 삭제(비활성화)하시겠습니까?'
+                : '정말로 [' + member.name + '] 팀원 정보를 삭제하시겠습니까?';
+
+            if (!confirm(msg)) return;
+
+            if (isFirebaseInitialized && db) {
+                db.collection("team_members").doc(String(memberId)).update({ active: false })
+                    .then(() => alert('팀원 정보가 삭제(비활성화)되었습니다. 기존 계약 이력은 보존됩니다.'))
+                    .catch(err => alert('삭제 처리 오류: ' + err.message));
+            } else {
+                const idx = teamMembersList.findIndex(m => String(m.id) === String(memberId));
+                if (idx !== -1) {
+                    teamMembersList[idx].active = false;
+                }
+                saveTeamMembersToStorage();
+                initAllFilters();
+                renderMemberSelect();
+                renderMemberMgmtTable();
+                renderDashboard();
+                alert('팀원 정보가 삭제(비활성화)되었습니다.');
+            }
+        }
+
+        function renderMemberMgmtTable() {
+            const tbody = document.getElementById('member-mgmt-table-body');
+            const countBadge = document.getElementById('member-mgmt-count-badge');
+            if (!tbody) return;
+
+            const activeMembers = teamMembersList.filter(m => m.active !== false);
+            if (countBadge) countBadge.innerText = '총 ' + activeMembers.length + '명 재직 중';
+
+            if (teamMembersList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-slate-400 font-medium">등록된 팀원이 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = teamMembersList.map((m, idx) => {
+                const isLeader = m.name === '사업부장님';
+                const isActive = m.active !== false;
+                const tenure = calculateTenureMonths(m.joinMonth);
+                const joinDisplay = m.joinMonth ? m.joinMonth + '월' : '-';
+                const birthDisplay = m.birthDate || '-';
+                const empIdDisplay = m.empId || '-';
+
+                const statusBadge = isActive
+                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">재직중</span>'
+                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">퇴사/비활성</span>';
+
+                return '<tr class="hover:bg-slate-50 transition border-b border-slate-100 ' + (!isActive ? 'opacity-50 bg-slate-50/50' : '') + '">' +
+                    '<td class="py-3 px-4 text-center text-slate-400 font-mono">' + (idx + 1) + '</td>' +
+                    '<td class="py-3 px-4 font-bold text-slate-800 flex items-center gap-1.5">' +
+                        m.name + (isLeader ? ' <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">리더</span>' : '') +
+                    '</td>' +
+                    '<td class="py-3 px-4 font-mono text-slate-600">' + empIdDisplay + '</td>' +
+                    '<td class="py-3 px-4 text-slate-600 font-medium">' + joinDisplay + '</td>' +
+                    '<td class="py-3 px-4 text-center font-bold text-blue-600 text-sm font-mono">' + tenure + '</td>' +
+                    '<td class="py-3 px-4 text-slate-500">' + birthDisplay + '</td>' +
+                    '<td class="py-3 px-4 text-center whitespace-nowrap">' + statusBadge + '</td>' +
+                    '<td class="py-3 px-4 text-center whitespace-nowrap">' +
+                        '<div class="flex items-center justify-center gap-1">' +
+                            '<button onclick="openMemberModal(true, \'' + m.id + '\')" class="p-1.5 hover:bg-blue-100 text-blue-600 rounded-md transition" title="수정"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>' +
+                            (!isLeader && isActive ? '<button onclick="deleteMember(\'' + m.id + '\')" class="p-1.5 hover:bg-rose-100 text-rose-600 rounded-md transition" title="삭제"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
+                        '</div>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+
+            if (window.lucide && lucide.createIcons) lucide.createIcons();
+        }
+
         function initAllFilters() {
             const years = getAvailablePerfYears();
             const memberNames = getAllKnownMemberNames();
 
             const dashYear = document.getElementById('dash-year-select');
             if (dashYear) {
-                const prev = dashYear.value;
+                const prevDashYear = dashYear.value;
                 dashYear.innerHTML = '<option value="ALL">전체 업적기간</option>' + years.map(y => '<option value="' + y + '">' + y + '년</option>').join('');
-                if (years.includes(prev)) dashYear.value = prev;
-                else if (years.length > 0) dashYear.value = years[0];
+                if (years.includes(prevDashYear)) {
+                    dashYear.value = prevDashYear;
+                } else if (years.length > 0) {
+                    dashYear.value = years[0];
+                }
             }
             updateDashMonthOptions();
+
             buildPeriodFilterOptions('filter-period');
 
+            const categories = [...new Set(contracts.map(c => c.category).filter(Boolean))];
             const filterCat = document.getElementById('filter-category');
             if (filterCat) {
-                const categories = [...new Set(contracts.map(c => c.category).filter(Boolean))];
                 filterCat.innerHTML = '<option value="ALL">전체 구분</option>' + categories.map(c => '<option value="' + c + '">' + c + '</option>').join('');
             }
 
@@ -916,6 +1108,7 @@
             if (filterMem) {
                 filterMem.innerHTML = '<option value="ALL">전체 팀원</option>' + memberNames.map(m => '<option value="' + m + '">' + m + '</option>').join('');
             }
+
             buildPeriodFilterOptions('member-period-select');
         }
 
@@ -925,6 +1118,7 @@
             const prevVal = el.value;
             const years = getAvailablePerfYears();
             let html = '<option value="ALL">전체 업적 기간</option>';
+
             years.forEach(y => {
                 html += '<option value="YEAR:' + y + '">📅 ' + y + '년 전체 업적</option>';
                 const months = getAvailablePerfMonthsForYear(y);
@@ -932,6 +1126,7 @@
                     html += '<option value="YM:' + y + '-' + m + '">&nbsp;&nbsp;&nbsp;&nbsp;↳ ' + y + '년 ' + m + '월 업적</option>';
                 });
             });
+
             el.innerHTML = html;
             if (prevVal) el.value = prevVal;
         }
@@ -945,13 +1140,16 @@
             const dashYear = document.getElementById('dash-year-select');
             const dashMonth = document.getElementById('dash-month-select');
             if (!dashYear || !dashMonth) return;
+
             const selectedYear = dashYear.value;
             if (selectedYear === 'ALL') {
                 dashMonth.innerHTML = '<option value="ALL">전체 월</option>';
             } else {
                 const months = getAvailablePerfMonthsForYear(selectedYear);
                 let html = '<option value="ALL">' + selectedYear + '년 전체</option>';
-                months.forEach(m => { html += '<option value="' + m + '">' + m + '월</option>'; });
+                months.forEach(m => {
+                    html += '<option value="' + m + '">' + m + '월</option>';
+                });
                 dashMonth.innerHTML = html;
             }
         }
@@ -960,7 +1158,11 @@
             if (!periodValue || periodValue === 'ALL') return true;
             const pYear = getContractPerfYear(c);
             const pMonth = getContractPerfMonth(c);
-            if (periodValue.startsWith('YEAR:')) return pYear === periodValue.replace('YEAR:', '');
+
+            if (periodValue.startsWith('YEAR:')) {
+                const targetYear = periodValue.replace('YEAR:', '');
+                return pYear === targetYear;
+            }
             if (periodValue.startsWith('YM:')) {
                 const parts = periodValue.replace('YM:', '').split('-');
                 return pYear === parts[0] && pMonth === parts[1];
@@ -975,7 +1177,6 @@
             const selectedMonth = dashMonth ? dashMonth.value : 'ALL';
 
             const filtered = contracts.filter(c => {
-                if (!isValidContract(c)) return false;
                 const pYear = getContractPerfYear(c);
                 const pMonth = getContractPerfMonth(c);
                 if (selectedYear !== 'ALL' && pYear !== selectedYear) return false;
@@ -996,26 +1197,41 @@
                 });
             });
 
-            document.getElementById('kpi-count').innerText = totalCount.toLocaleString() + ' 건';
-            document.getElementById('kpi-premium').innerText = Math.round(totalPremium).toLocaleString() + ' 원';
-            document.getElementById('kpi-conversion').innerText = Math.round(totalConversion).toLocaleString() + ' 원';
-            document.getElementById('kpi-leader').innerText = Math.round(leaderConversion).toLocaleString() + ' 원';
+            const kCount = document.getElementById('kpi-count');
+            const kCountSub = document.getElementById('kpi-count-sub');
+            const kPrem = document.getElementById('kpi-premium');
+            const kConv = document.getElementById('kpi-conversion');
+            const kLead = document.getElementById('kpi-leader');
+            const kLeadShare = document.getElementById('kpi-leader-share');
+
+            if (kCount) kCount.innerText = totalCount.toLocaleString() + ' 건';
+            const yearLabel = selectedYear === 'ALL' ? '전체 기간' : selectedYear + '년';
+            const monthLabel = selectedMonth === 'ALL' ? '전체' : selectedMonth + '월';
+            if (kCountSub) kCountSub.innerText = '[' + yearLabel + ' ' + monthLabel + '] 업적반영 계약';
+
+            if (kPrem) kPrem.innerText = Math.round(totalPremium).toLocaleString() + ' 원';
+            if (kConv) kConv.innerText = Math.round(totalConversion).toLocaleString() + ' 원';
+            if (kLead) kLead.innerText = Math.round(leaderConversion).toLocaleString() + ' 원';
 
             const leaderPct = totalConversion > 0 ? ((leaderConversion / totalConversion) * 100).toFixed(1) : '0.0';
-            document.getElementById('kpi-leader-share').innerText = '전체 환산 중 ' + leaderPct + '% 기여';
+            if (kLeadShare) kLeadShare.innerText = '전체 환산 중 ' + leaderPct + '% 기여';
 
             renderCharts(selectedYear, selectedMonth, filtered);
         }
 
         function renderCharts(selectedYear, selectedMonth, currentData) {
             if (typeof Chart === 'undefined') return;
+
             const yearForTrend = selectedYear === 'ALL' ? (getAvailablePerfYears()[0] || '2026') : selectedYear;
             const titleEl = document.getElementById('chart-monthly-title');
-            if (titleEl) titleEl.innerText = yearForTrend + '년 월별 환산 실적 및 계약 건수 추이';
+            if (titleEl) titleEl.innerText = yearForTrend + '년 월별 환산 실적 및 계약 건수 추이 (업적반영월 기준)';
 
-            const yearContracts = contracts.filter(c => getContractPerfYear(c) === yearForTrend && isValidContract(c));
+            const yearContracts = contracts.filter(c => getContractPerfYear(c) === yearForTrend);
             const monthlyStats = {};
-            for (let m = 1; m <= 12; m++) monthlyStats[String(m)] = { conv: 0, count: 0 };
+            for (let m = 1; m <= 12; m++) {
+                monthlyStats[String(m)] = { conv: 0, count: 0 };
+            }
+
             yearContracts.forEach(c => {
                 const m = getContractPerfMonth(c);
                 if (m && monthlyStats[m]) {
@@ -1025,24 +1241,67 @@
             });
 
             const monthLabels = Array.from({length: 12}, (_, i) => String(i + 1));
+            const convData = monthLabels.map(m => monthlyStats[m].conv);
+            const countData = monthLabels.map(m => monthlyStats[m].count);
+
             const canvasMonthly = document.getElementById('chart-monthly');
             if (canvasMonthly) {
+                const ctxMonthly = canvasMonthly.getContext('2d');
                 if (chartMonthly) chartMonthly.destroy();
-                chartMonthly = new Chart(canvasMonthly.getContext('2d'), {
+
+                chartMonthly = new Chart(ctxMonthly, {
                     type: 'bar',
                     data: {
                         labels: monthLabels.map(m => m + '월'),
                         datasets: [
-                            { label: '환산 실적 (원)', data: monthLabels.map(m => monthlyStats[m].conv), backgroundColor: 'rgba(59, 130, 246, 0.85)', borderRadius: 6, yAxisID: 'y' },
-                            { label: '계약 건수 (건)', data: monthLabels.map(m => monthlyStats[m].count), type: 'line', borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, borderWidth: 2, yAxisID: 'y1' }
+                            {
+                                label: '환산 실적 (원)',
+                                data: convData,
+                                backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                                borderRadius: 6,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '계약 건수 (건)',
+                                data: countData,
+                                type: 'line',
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                backgroundColor: 'rgba(16, 185, 129, 1)',
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                yAxisID: 'y1'
+                            }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: { position: 'left', ticks: { callback: v => (v / 10000).toLocaleString() + '만' }, grid: { color: '#f1f5f9' } },
-                            y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { stepSize: 1 } }
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                ticks: { callback: v => (v / 10000).toLocaleString() + '만' },
+                                grid: { color: '#f1f5f9' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { stepSize: 1 }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataset.type === 'line') {
+                                            return ' 계약 건수: ' + context.parsed.y + ' 건';
+                                        }
+                                        return ' 환산 실적: ' + context.parsed.y.toLocaleString() + ' 원';
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -1053,58 +1312,135 @@
                 const cat = c.category || '기타';
                 catStats[cat] = (catStats[cat] || 0) + (c.conversion || 0);
             });
+
             const canvasCat = document.getElementById('chart-category');
             if (canvasCat) {
+                const ctxCategory = canvasCat.getContext('2d');
                 if (chartCategory) chartCategory.destroy();
-                chartCategory = new Chart(canvasCat.getContext('2d'), {
+
+                chartCategory = new Chart(ctxCategory, {
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(catStats),
-                        datasets: [{ data: Object.values(catStats), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'] }]
+                        datasets: [{
+                            data: Object.values(catStats),
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b']
+                        }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const val = context.parsed || 0;
+                                        const sum = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : 0;
+                                        return ' ' + context.label + ': ' + val.toLocaleString() + '원 (' + pct + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             }
 
+            const periodText = selectedYear === 'ALL' ? '전체 기간' : (selectedMonth === 'ALL' ? selectedYear + '년 전체' : selectedYear + '년 ' + selectedMonth + '월');
+            const memTitle = document.getElementById('chart-members-title');
+            if (memTitle) memTitle.innerText = '팀원별 배분 환산실적 순위 (사업부장 제외 팀원) - [' + periodText + ']';
+
+            const currentTotalConversion = currentData.reduce((acc, c) => acc + (c.conversion || 0), 0);
+            const targetMembers = getAllKnownMemberNames().filter(m => m !== '사업부장님');
+            const memStats = {};
+            targetMembers.forEach(m => memStats[m] = 0);
+
+            currentData.forEach(c => {
+                (c.contributions || []).forEach(contrib => {
+                    if (contrib.name !== '사업부장님') {
+                        const amt = contrib.amount || (c.conversion * (contrib.rate <= 1 ? contrib.rate : contrib.rate / 100));
+                        memStats[contrib.name] = (memStats[contrib.name] || 0) + amt;
+                    }
+                });
+            });
+
+            const sortedMembers = Object.entries(memStats).sort((a,b) => b[1] - a[1]);
+            const memberNames = sortedMembers.map(item => item[0]);
+            const memberAmounts = sortedMembers.map(item => item[1]);
+
             const canvasMem = document.getElementById('chart-members');
             if (canvasMem) {
-                const targetMembers = getAllKnownMemberNames().filter(m => m !== '사업부장님');
-                const memStats = {};
-                targetMembers.forEach(m => memStats[m] = 0);
-                currentData.forEach(c => {
-                    (c.contributions || []).forEach(contrib => {
-                        if (contrib.name !== '사업부장님') {
-                            const amt = contrib.amount || (c.conversion * (contrib.rate <= 1 ? contrib.rate : contrib.rate / 100));
-                            memStats[contrib.name] = (memStats[contrib.name] || 0) + amt;
-                        }
-                    });
-                });
-                const sorted = Object.entries(memStats).sort((a,b) => b[1] - a[1]);
+                const ctxMembers = canvasMem.getContext('2d');
                 if (chartMembers) chartMembers.destroy();
-                chartMembers = new Chart(canvasMem.getContext('2d'), {
+
+                chartMembers = new Chart(ctxMembers, {
                     type: 'bar',
                     data: {
-                        labels: sorted.map(i => i[0]),
-                        datasets: [{ label: '배분 환산액', data: sorted.map(i => i[1]), backgroundColor: 'rgba(79, 70, 229, 0.85)', borderRadius: 6 }]
+                        labels: memberNames,
+                        datasets: [{
+                            label: '배분 환산액',
+                            data: memberAmounts,
+                            backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                            hoverBackgroundColor: 'rgba(67, 56, 202, 1)',
+                            borderRadius: 6,
+                            barPercentage: 0.75,
+                            categoryPercentage: 0.9
+                        }]
                     },
                     options: {
                         indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: { x: { ticks: { callback: v => (v / 10000).toLocaleString() + '만' } } }
+                        scales: {
+                            x: {
+                                ticks: { callback: v => (v / 10000).toLocaleString() + '만' },
+                                grid: { color: '#f1f5f9' }
+                            },
+                            y: {
+                                ticks: {
+                                    autoSkip: false,
+                                    font: { size: 12, weight: '600' },
+                                    color: '#1e293b'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#0f172a',
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                padding: 10,
+                                callbacks: {
+                                    title: function(context) {
+                                        return '팀원: ' + context[0].label;
+                                    },
+                                    label: function(context) {
+                                        const val = context.parsed.x || 0;
+                                        const pct = currentTotalConversion > 0 ? ((val / currentTotalConversion) * 100).toFixed(1) : '0.0';
+                                        return '배분환산액: ' + Math.round(val).toLocaleString() + '원 (총 환산 대비 ' + pct + '%)';
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
             }
         }
 
+        // ================= [수정 완료] 계약일자(date) 최신순 내림차순 정렬 =================
         function getFilteredContracts() {
-            const search = (document.getElementById('filter-search')?.value || '').toLowerCase().trim();
-            const periodVal = document.getElementById('filter-period')?.value || 'ALL';
-            const category = document.getElementById('filter-category')?.value || 'ALL';
-            const member = document.getElementById('filter-member')?.value || 'ALL';
+            const searchInput = document.getElementById('filter-search');
+            const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const periodSelect = document.getElementById('filter-period');
+            const periodVal = periodSelect ? periodSelect.value : 'ALL';
+            const catSelect = document.getElementById('filter-category');
+            const category = catSelect ? catSelect.value : 'ALL';
+            const memSelect = document.getElementById('filter-member');
+            const member = memSelect ? memSelect.value : 'ALL';
 
-            return contracts.filter(c => {
-                if (!isValidContract(c)) return false;
+            const filtered = contracts.filter(c => {
                 if (!matchesPeriod(c, periodVal)) return false;
                 if (category !== 'ALL' && c.category !== category) return false;
                 if (member !== 'ALL' && !(c.contributions || []).some(con => con.name === member)) return false;
@@ -1116,16 +1452,40 @@
                 }
                 return true;
             });
+
+            // 계약일자(date) 최신순(내림차순) 정렬, 동일 일자일 경우 ID 내림차순
+            return filtered.sort((a, b) => {
+                const dateA = a.date || '';
+                const dateB = b.date || '';
+                if (dateA !== dateB) {
+                    return dateB.localeCompare(dateA);
+                }
+                return (b.id || 0) - (a.id || 0);
+            });
+        }
+
+        function formatPromotionDisplay(p) {
+            if (!p || p === 0) return '-';
+            return p + '%';
+        }
+
+        function formatRebateDisplay(r) {
+            if (!r || r === 0) return '-';
+            return Math.round(r).toLocaleString() + '만원';
         }
 
         function renderTable() {
             const filtered = getFilteredContracts();
-            document.getElementById('table-total-count').innerText = filtered.length;
+            const countEl = document.getElementById('table-total-count');
+            if (countEl) countEl.innerText = filtered.length;
+
             const sumFilteredConv = filtered.reduce((acc, c) => acc + (c.conversion || 0), 0);
-            document.getElementById('table-total-conv-badge').innerText = '환산합계: ' + Math.round(sumFilteredConv).toLocaleString() + '원';
+            const badgeEl = document.getElementById('table-total-conv-badge');
+            if (badgeEl) badgeEl.innerText = '환산합계: ' + Math.round(sumFilteredConv).toLocaleString() + '원';
 
             const totalPages = Math.ceil(filtered.length / pageSize) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
+
             const start = (currentPage - 1) * pageSize;
             const pageData = filtered.slice(start, start + pageSize);
 
@@ -1133,71 +1493,73 @@
             if (!tbody) return;
 
             if (pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="12" class="text-center py-10 text-slate-400 font-medium">조회된 계약 데이터가 없습니다.</td></tr>';
-                document.getElementById('page-info').innerText = '0 / 0 페이지';
+                tbody.innerHTML = '<tr><td colspan="12" class="text-center py-10 text-slate-400 font-medium">일치하는 계약 데이터가 없습니다.</td></tr>';
+                const pInfo = document.getElementById('page-info');
+                if (pInfo) pInfo.innerText = '0 / 0 페이지';
                 return;
             }
 
             tbody.innerHTML = pageData.map((c, idx) => {
                 const globalIdx = filtered.length - (start + idx);
+                const pYear = getContractPerfYear(c);
                 const pMonth = getContractPerfMonth(c);
+                const cYear = c.date && c.date.length >= 4 ? c.date.substring(0, 4) : pYear;
+
+                const isCrossYear = pYear !== cYear;
+                const perfBadge = isCrossYear 
+                    ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300" title="계약일(' + (c.date||'-') + ')과 업적년도가 다름">' + pYear + '년 ' + pMonth + '월</span>'
+                    : '<span class="font-semibold text-slate-700">' + pMonth + '월</span>';
 
                 const contribTags = (c.contributions || []).map(con => {
                     const isLeader = con.name === '사업부장님';
                     const rateDisplay = (con.rate <= 1 ? (con.rate * 100).toFixed(0) : con.rate) + '%';
                     const cls = isLeader ? 'bg-amber-100 text-amber-800 font-bold' : 'bg-blue-50 text-blue-700 font-medium';
-                    return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${cls}">${con.name} <b>${rateDisplay}</b></span>`;
+                    return '<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ' + cls + '">' +
+                        con.name + ' <b class="text-[9px] font-bold">' + rateDisplay + '</b></span>';
                 }).join(' ');
 
-                return `<tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                    <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${c.id || globalIdx}</td>
-                    <td class="py-2.5 px-3 whitespace-nowrap font-semibold text-slate-700">${pMonth}월</td>
-                    <td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">${c.date || '-'}</td>
-                    <td class="py-2.5 px-4 font-bold text-slate-800">${c.corp || '-'} <span class="font-normal text-slate-400 text-[11px]">(${c.insured || '-'})</span></td>
-                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium whitespace-nowrap">${c.category || '-'}</span></td>
-                    <td class="py-2.5 px-4 text-slate-700">${c.product || '-'}</td>
-                    <td class="py-2.5 px-3 text-right font-mono text-slate-600">${Math.round(c.premium || 0).toLocaleString()}</td>
-                    <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-600">${Math.round(c.conversion || 0).toLocaleString()}</td>
-                    <td class="py-2.5 px-4"><div class="flex flex-wrap gap-1">${contribTags || '-'}</div></td>
-                    <td class="py-2.5 px-3 text-center text-slate-700 font-medium">${c.promotion ? c.promotion + '%' : '-'}</td>
-                    <td class="py-2.5 px-3 text-center text-slate-700 font-medium">${c.rebate ? Math.round(c.rebate) + '만원' : '-'}</td>
-                    <td class="py-2.5 px-3 text-center whitespace-nowrap">
-                        <div class="flex items-center justify-center gap-1">
-                            <button onclick="editContract(${c.id})" class="p-1.5 hover:bg-blue-100 text-blue-600 rounded-md transition"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteContract(${c.id})" class="p-1.5 hover:bg-rose-100 text-rose-600 rounded-md transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                    </td>
-                </tr>`;
+                const promText = formatPromotionDisplay(c.promotion);
+                const rebText = formatRebateDisplay(c.rebate);
+
+                return '<tr class="hover:bg-slate-50 transition border-b border-slate-100">' +
+                    '<td class="py-2.5 px-3 text-center text-slate-400 font-mono">' + (c.id || globalIdx) + '</td>' +
+                    '<td class="py-2.5 px-3 whitespace-nowrap">' + perfBadge + '</td>' +
+                    '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">' + (c.date || '-') + '</td>' +
+                    '<td class="py-2.5 px-4 font-bold text-slate-800">' + (c.corp || '-') + ' <span class="font-normal text-slate-400 text-[11px]">(' + (c.insured || '-') + ')</span></td>' +
+                    '<td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium whitespace-nowrap">' + (c.category || '-') + '</span></td>' +
+                    '<td class="py-2.5 px-4 text-slate-700">' + (c.product || '-') + '</td>' +
+                    '<td class="py-2.5 px-3 text-right font-mono text-slate-600 whitespace-nowrap">' + Math.round(c.premium || 0).toLocaleString() + '</td>' +
+                    '<td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-600 whitespace-nowrap">' + Math.round(c.conversion || 0).toLocaleString() + '</td>' +
+                    '<td class="py-2.5 px-4"><div class="flex flex-wrap gap-1">' + (contribTags || '<span class="text-slate-400">-</span>') + '</div></td>' +
+                    '<td class="py-2.5 px-3 text-center text-slate-700 font-medium whitespace-nowrap text-[11px]">' + promText + '</td>' +
+                    '<td class="py-2.5 px-3 text-center text-slate-700 font-medium whitespace-nowrap text-[11px]">' + rebText + '</td>' +
+                    '<td class="py-2.5 px-3 text-center whitespace-nowrap">' +
+                        '<div class="flex items-center justify-center gap-1">' +
+                            '<button onclick="editContract(' + c.id + ')" class="p-1.5 hover:bg-blue-100 text-blue-600 rounded-md transition" title="수정"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>' +
+                            '<button onclick="deleteContract(' + c.id + ')" class="p-1.5 hover:bg-rose-100 text-rose-600 rounded-md transition" title="삭제"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' +
+                        '</div>' +
+                    '</td>' +
+                '</tr>';
             }).join('');
 
-            document.getElementById('page-info').innerText = currentPage + ' / ' + totalPages + ' 페이지';
-            document.getElementById('btn-prev').disabled = currentPage <= 1;
-            document.getElementById('btn-next').disabled = currentPage >= totalPages;
+            const pInfo = document.getElementById('page-info');
+            if (pInfo) pInfo.innerText = currentPage + ' / ' + totalPages + ' 페이지';
+            const bPrev = document.getElementById('btn-prev');
+            const bNext = document.getElementById('btn-next');
+            if (bPrev) bPrev.disabled = currentPage <= 1;
+            if (bNext) bNext.disabled = currentPage >= totalPages;
             if (window.lucide && lucide.createIcons) lucide.createIcons();
         }
 
         function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
         function nextPage() { currentPage++; renderTable(); }
 
-        function deleteContract(id) {
-            if (confirm(`정말로 No.${id} 계약 정보를 삭제하시겠습니까?`)) {
-                if (isFirebaseInitialized && db) {
-                    db.collection("contracts").doc(String(id)).delete().catch(()=>{});
-                }
-                contracts = contracts.filter(c => c.id !== id);
-                saveToLocalStorage();
-                renderTable();
-                renderDashboard();
-                renderMemberDetail();
-            }
-        }
-
         function renderMemberSelect() {
             const select = document.getElementById('member-select');
             const memberNames = getAllKnownMemberNames();
             if (select) {
                 const prev = select.value;
-                select.innerHTML = memberNames.map(m => `<option value="${m}">${m}</option>`).join('');
+                select.innerHTML = memberNames.map(m => '<option value="' + m + '">' + m + '</option>').join('');
                 if (prev && memberNames.includes(prev)) select.value = prev;
             }
             renderMemberDetail();
@@ -1210,7 +1572,6 @@
             const periodVal = periodSelect ? periodSelect.value : 'ALL';
 
             const relevant = contracts.filter(c => {
-                if (!isValidContract(c)) return false;
                 if (!matchesPeriod(c, periodVal)) return false;
                 return (c.contributions || []).some(con => con.name === memberName);
             });
@@ -1224,7 +1585,7 @@
             if (!tbody || !tfoot) return;
 
             if (relevant.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-10 text-slate-400 font-medium">참여한 공동모집 계약 내역이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-10 text-slate-400 font-medium">해당 조건에 참여한 공동모집 계약 내역이 없습니다.</td></tr>';
                 tfoot.innerHTML = '';
             } else {
                 tbody.innerHTML = relevant.map((c, idx) => {
@@ -1236,253 +1597,66 @@
                     sumMemberConv += myAmount;
                     sumMemberPremium += (c.premium || 0);
 
-                    const partners = c.contributions.filter(con => con.name !== memberName).map(con => `${con.name}(${(con.rate <= 1 ? con.rate * 100 : con.rate).toFixed(0)}%)`).join(', ');
+                    const partners = c.contributions
+                        .filter(con => con.name !== memberName)
+                        .map(con => con.name + '(' + (con.rate <= 1 ? con.rate * 100 : con.rate).toFixed(0) + '%)')
+                        .join(', ');
 
-                    return `<tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-                        <td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">${getContractPerfYear(c)}년 ${getContractPerfMonth(c)}월</td>
-                        <td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">${c.date || '-'}</td>
-                        <td class="py-2.5 px-4 font-bold text-slate-800">${c.corp || '-'} <span class="font-normal text-slate-400 text-[11px]">(${c.insured || '-'})</span></td>
-                        <td class="py-2.5 px-4 text-slate-700">${c.product || '-'}</td>
-                        <td class="py-2.5 px-3 text-right font-mono text-slate-600">${Math.round(c.premium || 0).toLocaleString()} 원</td>
-                        <td class="py-2.5 px-3 text-right font-mono text-slate-700">${Math.round(c.conversion || 0).toLocaleString()} 원</td>
-                        <td class="py-2.5 px-3 text-center font-bold text-slate-800">${myRate.toFixed(1)}%</td>
-                        <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600">${Math.round(myAmount).toLocaleString()} 원</td>
-                        <td class="py-2.5 px-4 text-slate-500 text-[11px]">${partners || '없음'}</td>
-                    </tr>`;
+                    const pYear = getContractPerfYear(c);
+                    const pMonth = getContractPerfMonth(c);
+
+                    return '<tr class="hover:bg-slate-50 transition border-b border-slate-100">' +
+                        '<td class="py-2.5 px-3 text-center text-slate-400 font-mono">' + (idx + 1) + '</td>' +
+                        '<td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">' + pYear + '년 ' + pMonth + '월</td>' +
+                        '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">' + (c.date || '-') + '</td>' +
+                        '<td class="py-2.5 px-4 font-bold text-slate-800">' + (c.corp || '-') + ' <span class="font-normal text-slate-400 text-[11px]">(' + (c.insured || '-') + ')</span></td>' +
+                        '<td class="py-2.5 px-4 text-slate-700">' + (c.product || '-') + '</td>' +
+                        '<td class="py-2.5 px-3 text-right font-mono text-slate-600 whitespace-nowrap">' + Math.round(c.premium || 0).toLocaleString() + ' 원</td>' +
+                        '<td class="py-2.5 px-3 text-right font-mono text-slate-700 whitespace-nowrap">' + Math.round(c.conversion || 0).toLocaleString() + ' 원</td>' +
+                        '<td class="py-2.5 px-3 text-center font-bold text-slate-800 whitespace-nowrap">' + myRate.toFixed(1) + '%</td>' +
+                        '<td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600 whitespace-nowrap">' + Math.round(myAmount).toLocaleString() + ' 원</td>' +
+                        '<td class="py-2.5 px-4 text-slate-500 text-[11px]">' + (partners || '없음') + '</td>' +
+                    '</tr>';
                 }).join('');
 
                 const weightedAvgRate = sumTotalContractConv > 0 ? ((sumMemberConv / sumTotalContractConv) * 100).toFixed(1) : '0.0';
-                tfoot.innerHTML = `<tr class="bg-slate-100 border-t-2 border-slate-300 text-slate-800">
-                    <td colspan="5" class="py-3 px-4 text-center font-bold">합 계</td>
-                    <td class="py-3 px-3 text-right font-mono font-bold">${Math.round(sumMemberPremium).toLocaleString()} 원</td>
-                    <td class="py-3 px-3 text-right font-mono font-bold">${Math.round(sumTotalContractConv).toLocaleString()} 원</td>
-                    <td class="py-3 px-3 text-center font-bold text-blue-700">${weightedAvgRate}%</td>
-                    <td class="py-3 px-3 text-right font-mono font-bold text-blue-700">${Math.round(sumMemberConv).toLocaleString()} 원</td>
-                    <td class="py-3 px-4 text-slate-400 text-[11px]">총 ${relevant.length}건</td>
-                </tr>`;
+                tfoot.innerHTML = '<tr class="bg-slate-100 border-t-2 border-slate-300 text-slate-800">' +
+                    '<td colspan="5" class="py-3 px-4 text-center font-bold">합 계</td>' +
+                    '<td class="py-3 px-3 text-right font-mono font-bold">' + Math.round(sumMemberPremium).toLocaleString() + ' 원</td>' +
+                    '<td class="py-3 px-3 text-right font-mono font-bold">' + Math.round(sumTotalContractConv).toLocaleString() + ' 원</td>' +
+                    '<td class="py-3 px-3 text-center font-bold text-blue-700">' + weightedAvgRate + '%</td>' +
+                    '<td class="py-3 px-3 text-right font-mono font-bold text-blue-700">' + Math.round(sumMemberConv).toLocaleString() + ' 원</td>' +
+                    '<td class="py-3 px-4 text-slate-400 text-[11px]">총 ' + relevant.length + '건</td>' +
+                '</tr>';
             }
 
-            document.getElementById('mem-kpi-count').innerText = relevant.length + ' 건';
-            document.getElementById('mem-kpi-my-conv').innerText = Math.round(sumMemberConv).toLocaleString() + ' 원';
-            document.getElementById('mem-kpi-total-conv').innerText = Math.round(sumTotalContractConv).toLocaleString() + ' 원';
-            document.getElementById('mem-kpi-avg-rate').innerText = (sumTotalContractConv > 0 ? ((sumMemberConv / sumTotalContractConv) * 100).toFixed(1) : '0.0') + '%';
-        }
+            const actualAvgRate = sumTotalContractConv > 0 ? ((sumMemberConv / sumTotalContractConv) * 100).toFixed(1) : '0.0';
 
-        // [핵심 로직] 재직 팀원 상단, 비활성(퇴사/해촉/기타) 팀원 하단 정렬 배치
-        function renderMemberMgmtTable() {
-            const tbody = document.getElementById('member-mgmt-table-body');
-            const countBadge = document.getElementById('member-mgmt-count-badge');
-            if (!tbody) return;
+            const mCount = document.getElementById('mem-kpi-count');
+            const mMyConv = document.getElementById('mem-kpi-my-conv');
+            const mTotConv = document.getElementById('mem-kpi-total-conv');
+            const mAvgRate = document.getElementById('mem-kpi-avg-rate');
 
-            const activeList = [];
-            const inactiveList = [];
-
-            teamMembersList.forEach(m => {
-                if (m.active !== false) {
-                    activeList.push(m);
-                } else {
-                    inactiveList.push(m);
-                }
-            });
-
-            // 재직중 팀원은 지정 순서 우선 적용
-            activeList.sort((a, b) => {
-                const idxA = ORDERED_MEMBER_NAMES.indexOf(a.name);
-                const idxB = ORDERED_MEMBER_NAMES.indexOf(b.name);
-                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                if (idxA !== -1) return -1;
-                if (idxB !== -1) return 1;
-                return (a.name || '').localeCompare(b.name || '', 'ko');
-            });
-
-            // 비활성 팀원 정렬
-            inactiveList.sort((a, b) => {
-                const idxA = ORDERED_MEMBER_NAMES.indexOf(a.name);
-                const idxB = ORDERED_MEMBER_NAMES.indexOf(b.name);
-                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                if (idxA !== -1) return -1;
-                if (idxB !== -1) return 1;
-                return (a.name || '').localeCompare(b.name || '', 'ko');
-            });
-
-            const sortedMemberList = [...activeList, ...inactiveList];
-
-            if (countBadge) countBadge.innerText = `재직 ${activeList.length}명 / 비활성 ${inactiveList.length}명`;
-
-            if (sortedMemberList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-slate-400 font-medium">등록된 팀원이 없습니다.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = sortedMemberList.map((m, idx) => {
-                const isLeader = m.name === '사업부장님';
-                const isActive = m.active !== false;
-                const tenure = calculateTenureMonths(m.joinMonth);
-                
-                let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">재직중</span>';
-                if (!isActive) {
-                    const reason = m.inactiveReason || '퇴사';
-                    const colorMap = {
-                        '퇴사': 'bg-slate-100 text-slate-600 border border-slate-300',
-                        '해촉': 'bg-rose-100 text-rose-700 border border-rose-200',
-                        '기타': 'bg-amber-100 text-amber-800 border border-amber-200'
-                    };
-                    const badgeClass = colorMap[reason] || 'bg-slate-100 text-slate-600 border border-slate-300';
-                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${reason}</span>`;
-                }
-
-                return `<tr class="hover:bg-slate-50 transition border-b border-slate-100 ${!isActive ? 'bg-slate-50/70 opacity-75' : ''}">
-                    <td class="py-3 px-4 text-center text-slate-400 font-mono">${idx + 1}</td>
-                    <td class="py-3 px-4 font-bold ${isActive ? 'text-slate-800' : 'text-slate-500 line-through'}">${m.name} ${isLeader ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-100 text-amber-800 font-bold ml-1">리더</span>' : ''}</td>
-                    <td class="py-3 px-4 font-mono text-slate-600">${m.empId || '-'}</td>
-                    <td class="py-3 px-4 text-slate-600 font-medium">${m.joinMonth || '-'}</td>
-                    <td class="py-3 px-4 text-center font-bold text-blue-600">${tenure}</td>
-                    <td class="py-3 px-4 text-slate-500">${m.birthDate || '-'}</td>
-                    <td class="py-3 px-4 text-center">${statusBadge}</td>
-                    <td class="py-3 px-4 text-center whitespace-nowrap">
-                        <div class="flex items-center justify-center gap-1">
-                            <button onclick="openMemberModal(true, '${m.id}')" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition" title="수정"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
-                            ${!isLeader ? `<button onclick="deleteMember('${m.id}')" class="p-1.5 text-rose-600 hover:bg-rose-100 rounded transition" title="완전 삭제 (잘못 등록된 정보 제거)"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
-            if (window.lucide && lucide.createIcons) lucide.createIcons();
-        }
-
-        // [핵심] 휴지통 버튼 누를 시 완전히 목록 및 DB에서 영구 삭제
-        function deleteMember(memberId) {
-            const member = teamMembersList.find(m => String(m.id) === String(memberId));
-            if (!member) return;
-
-            if (member.name === '사업부장님') {
-                alert('사업부장님 계정은 삭제할 수 없습니다.');
-                return;
-            }
-
-            const contractCount = contracts.filter(c => (c.contributions || []).some(con => con.name === member.name)).length;
-            let confirmMsg = `정말로 [${member.name}] 팀원을 완전히 삭제하시겠습니까?\n잘못 등록된 정보가 팀원 관리 목록에서 즉시 영구 삭제됩니다.`;
-            if (contractCount > 0) {
-                confirmMsg = `⚠️ 주의: [${member.name}] 팀원은 총 ${contractCount}건의 기여 계약 이력이 존재합니다.\n완전 삭제 시 팀원 관리 명단에서 완전히 지워집니다. 진행하시겠습니까?`;
-            }
-
-            if (!confirm(confirmMsg)) return;
-
-            // Firestore 클라우드 영구 삭제
-            if (isFirebaseInitialized && db) {
-                db.collection("team_members").doc(String(memberId)).delete()
-                    .catch(err => console.warn('클라우드 삭제 알림:', err));
-            }
-
-            // 로컬 상태 영구 제거
-            teamMembersList = teamMembersList.filter(m => String(m.id) !== String(memberId));
-            saveTeamMembersToStorage();
-
-            initAllFilters();
-            renderMemberSelect();
-            renderMemberMgmtTable();
-            alert(`✅ [${member.name}] 팀원 정보가 완전히 삭제되었습니다.`);
-        }
-
-        function toggleInactiveReasonField() {
-            const isInactive = document.getElementById('mem-form-inactive').checked;
-            const box = document.getElementById('inactive-reason-box');
-            if (isInactive) {
-                box.classList.remove('hidden');
-            } else {
-                box.classList.add('hidden');
-            }
-        }
-
-        function openMemberModal(isEdit = false, memberId = null) {
-            document.getElementById('member-modal').classList.remove('hidden');
-            const inactiveBox = document.getElementById('inactive-reason-box');
-            
-            if (!isEdit) {
-                document.getElementById('member-modal-title').innerHTML = '<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i> 신규 팀원 등록';
-                document.getElementById('member-form').reset();
-                document.getElementById('mem-form-id').value = '';
-                document.getElementById('mem-form-inactive').checked = false;
-                inactiveBox.classList.add('hidden');
-                const now = new Date();
-                document.getElementById('mem-form-join').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-            } else {
-                document.getElementById('member-modal-title').innerHTML = '<i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i> 팀원 정보 및 재직상태 수정';
-                const mem = teamMembersList.find(m => String(m.id) === String(memberId));
-                if (mem) {
-                    document.getElementById('mem-form-id').value = mem.id;
-                    document.getElementById('mem-form-name').value = mem.name || '';
-                    document.getElementById('mem-form-empid').value = mem.empId || '';
-                    document.getElementById('mem-form-birth').value = mem.birthDate || '';
-                    document.getElementById('mem-form-join').value = mem.joinMonth || '';
-                    
-                    const isInactive = mem.active === false;
-                    document.getElementById('mem-form-inactive').checked = isInactive;
-                    if (isInactive) {
-                        inactiveBox.classList.remove('hidden');
-                        document.getElementById('mem-form-reason').value = mem.inactiveReason || '퇴사';
-                    } else {
-                        inactiveBox.classList.add('hidden');
-                    }
-                }
-            }
-            updateMemberModalTenurePreview();
-            if (window.lucide && lucide.createIcons) lucide.createIcons();
-        }
-
-        function closeMemberModal() {
-            document.getElementById('member-modal').classList.add('hidden');
-        }
-
-        function updateMemberModalTenurePreview() {
-            const joinVal = document.getElementById('mem-form-join').value;
-            const badge = document.getElementById('mem-calc-tenure-badge');
-            if (badge) badge.innerText = '현재 ' + calculateTenureMonths(joinVal);
-        }
-
-        function handleSaveMember(e) {
-            e.preventDefault();
-            const idVal = document.getElementById('mem-form-id').value;
-            const name = document.getElementById('mem-form-name').value.trim();
-            const memberId = idVal ? idVal : 'mem_' + Date.now();
-            const isInactive = document.getElementById('mem-form-inactive').checked;
-            const inactiveReason = isInactive ? document.getElementById('mem-form-reason').value : '';
-
-            const memberData = {
-                id: memberId,
-                name: name,
-                empId: document.getElementById('mem-form-empid').value.trim(),
-                birthDate: document.getElementById('mem-form-birth').value,
-                joinMonth: document.getElementById('mem-form-join').value,
-                active: !isInactive,
-                inactiveReason: inactiveReason
-            };
-
-            if (isFirebaseInitialized && db) {
-                db.collection("team_members").doc(memberId).set(memberData).catch(()=>{});
-            }
-
-            if (idVal) {
-                const idx = teamMembersList.findIndex(m => String(m.id) === String(idVal));
-                if (idx !== -1) teamMembersList[idx] = memberData;
-            } else {
-                teamMembersList.push(memberData);
-            }
-
-            saveTeamMembersToStorage();
-            closeMemberModal();
-            initAllFilters();
-            renderMemberSelect();
-            renderMemberMgmtTable();
-            alert('✅ 팀원 정보가 저장되었습니다.');
+            if (mCount) mCount.innerText = relevant.length + ' 건';
+            if (mMyConv) mMyConv.innerText = Math.round(sumMemberConv).toLocaleString() + ' 원';
+            if (mTotConv) mTotConv.innerText = Math.round(sumTotalContractConv).toLocaleString() + ' 원';
+            if (mAvgRate) mAvgRate.innerText = actualAvgRate + '%';
         }
 
         function onContractDateChange() {
             const dateVal = document.getElementById('form-date').value;
             if (dateVal && dateVal.length >= 7) {
-                document.getElementById('form-perf-year').value = dateVal.substring(0, 4);
-                document.getElementById('form-perf-month').value = String(parseInt(dateVal.substring(5, 7), 10));
+                const dYear = dateVal.substring(0, 4);
+                const dMonth = parseInt(dateVal.substring(5, 7), 10);
+                
+                const yearSelect = document.getElementById('form-perf-year');
+                const monthSelect = document.getElementById('form-perf-month');
+                if (yearSelect && [...yearSelect.options].some(o => o.value === dYear)) {
+                    yearSelect.value = dYear;
+                }
+                if (monthSelect) {
+                    monthSelect.value = String(dMonth);
+                }
             }
         }
 
@@ -1493,8 +1667,11 @@
                 document.getElementById('contract-form').reset();
                 document.getElementById('form-id').value = '';
                 document.getElementById('modal-contributions-list').innerHTML = '';
-                document.getElementById('form-date').value = new Date().toISOString().slice(0, 10);
+                
+                const today = new Date().toISOString().slice(0, 10);
+                document.getElementById('form-date').value = today;
                 onContractDateChange();
+
                 addContributionRow('사업부장님', 0.5);
                 addContributionRow('', 0.5);
             }
@@ -1511,21 +1688,21 @@
             if (!container) return;
             const row = document.createElement('div');
             row.className = 'contrib-row flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200';
+            
+            const activeNames = getActiveMemberNames();
             const ratePercent = rateVal <= 1 && rateVal > 0 ? (rateVal * 100).toFixed(0) : (rateVal || 0);
+            let optionsHtml = '<option value="">팀원 선택</option>' + activeNames.map(m => '<option value="' + m + '" ' + (m === memberName ? 'selected' : '') + '>' + m + '</option>').join('');
 
-            // 신규 계약 등록 시에는 재직중인 활성 팀원만 목록에 노출
-            const sortedActiveMembers = getActiveMemberNames();
-
-            row.innerHTML = `<select class="contrib-name text-xs border border-slate-300 rounded px-2 py-1.5 bg-white flex-1 font-medium">
-                <option value="">팀원 선택</option>
-                ${sortedActiveMembers.map(m => `<option value="${m}" ${m === memberName ? 'selected' : ''}>${m}</option>`).join('')}
-            </select>
-            <div class="flex items-center gap-1 w-24">
-                <input type="number" step="any" min="0" max="100" value="${ratePercent}" oninput="updateModalContributionsCalc()" class="contrib-rate text-xs border border-slate-300 rounded px-2 py-1 text-right w-16 bg-white font-bold">
-                <span class="text-xs text-slate-500 font-semibold">%</span>
-            </div>
-            <div class="w-28 text-right font-mono text-[11px] text-slate-600 contrib-calc-amount font-semibold">0 원</div>
-            <button type="button" onclick="this.parentElement.remove(); updateModalContributionsCalc();" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>`;
+            row.innerHTML = '<select class="contrib-name text-xs border border-slate-300 rounded px-2 py-1.5 bg-white flex-1 focus:ring-1 focus:ring-blue-500 font-medium">' +
+                    optionsHtml +
+                '</select>' +
+                '<div class="flex items-center gap-1 w-24">' +
+                    '<input type="number" step="any" min="0" max="100" value="' + ratePercent + '" oninput="updateModalContributionsCalc()" class="contrib-rate text-xs border border-slate-300 rounded px-2 py-1 text-right w-16 bg-white focus:ring-1 focus:ring-blue-500 font-bold">' +
+                    '<span class="text-xs text-slate-500 font-semibold">%</span>' +
+                '</div>' +
+                '<div class="w-28 text-right font-mono text-[11px] text-slate-600 contrib-calc-amount font-semibold">0 원</div>' +
+                '<button type="button" onclick="this.parentElement.remove(); updateModalContributionsCalc();" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>';
+            
             container.appendChild(row);
             updateModalContributionsCalc();
             if (window.lucide && lucide.createIcons) lucide.createIcons();
@@ -1535,20 +1712,30 @@
             const totalConversion = parseFloat(document.getElementById('form-conversion').value) || 0;
             const rows = document.querySelectorAll('#modal-contributions-list .contrib-row');
             let sumRate = 0;
+
             rows.forEach(row => {
-                const rate = parseFloat(row.querySelector('.contrib-rate').value) || 0;
+                const rateInput = row.querySelector('.contrib-rate');
+                const calcDiv = row.querySelector('.contrib-calc-amount');
+                const rate = parseFloat(rateInput.value) || 0;
                 sumRate += rate;
-                row.querySelector('.contrib-calc-amount').innerText = Math.round(totalConversion * (rate / 100)).toLocaleString() + ' 원';
+                const calcAmt = Math.round(totalConversion * (rate / 100));
+                calcDiv.innerText = calcAmt.toLocaleString() + ' 원';
             });
-            const el = document.getElementById('form-total-rate');
-            if (el) {
-                el.innerText = sumRate.toFixed(1) + '%';
-                el.className = Math.abs(sumRate - 100) < 0.001 ? 'font-bold text-emerald-600 text-sm' : 'font-bold text-rose-600 text-sm';
+
+            const totalRateEl = document.getElementById('form-total-rate');
+            if (totalRateEl) {
+                totalRateEl.innerText = sumRate.toFixed(1) + '%';
+                if (Math.abs(sumRate - 100) < 0.001) {
+                    totalRateEl.className = 'font-bold text-emerald-600 text-sm';
+                } else {
+                    totalRateEl.className = 'font-bold text-rose-600 text-sm';
+                }
             }
         }
 
         function handleSaveContract(e) {
             e.preventDefault();
+
             const rows = document.querySelectorAll('#modal-contributions-list .contrib-row');
             let sumRate = 0;
             const contributions = [];
@@ -1558,91 +1745,263 @@
                 const ratePct = parseFloat(row.querySelector('.contrib-rate').value) || 0;
                 if (name && ratePct > 0) {
                     sumRate += ratePct;
-                    const rDec = ratePct / 100;
-                    contributions.push({ name, rate: rDec, amount: Math.round((parseFloat(document.getElementById('form-conversion').value) || 0) * rDec) });
+                    const rateDecimal = ratePct / 100;
+                    contributions.push({
+                        name: name,
+                        rate: rateDecimal,
+                        amount: Math.round((parseFloat(document.getElementById('form-conversion').value) || 0) * rateDecimal)
+                    });
                 }
             });
 
             if (Math.abs(sumRate - 100) > 0.001) {
-                alert(`⚠️ 기여율 합계가 100%가 되어야 합니다. (현재: ${sumRate.toFixed(1)}%)`);
+                alert('⚠️ 기여율 합계가 100%가 되어야 합니다.\n(현재 입력 합계: ' + sumRate.toFixed(1) + '%)');
                 return;
             }
 
             const idVal = document.getElementById('form-id').value;
             const nextId = idVal ? parseInt(idVal) : (contracts.length > 0 ? Math.max(...contracts.map(c => c.id || 0)) + 1 : 1);
+            const conversion = parseFloat(document.getElementById('form-conversion').value) || 0;
+
             const perfYear = document.getElementById('form-perf-year').value;
             const perfMonth = document.getElementById('form-perf-month').value;
+            const dateVal = document.getElementById('form-date').value;
 
             const newContract = {
                 id: nextId,
-                corp: document.getElementById('form-corp').value.trim(),
-                insured: document.getElementById('form-insured').value.trim(),
+                corp: document.getElementById('form-corp').value,
+                insured: document.getElementById('form-insured').value,
                 perfYear: perfYear,
                 perfMonth: perfMonth,
                 month: perfYear + '-' + (perfMonth.length === 1 ? '0' + perfMonth : perfMonth),
-                date: document.getElementById('form-date').value,
-                category: document.getElementById('form-category').value.trim(),
-                product: document.getElementById('form-product').value.trim(),
+                date: dateVal,
+                category: document.getElementById('form-category').value,
+                product: document.getElementById('form-product').value,
                 premium: parseFloat(document.getElementById('form-premium').value) || 0,
-                conversion: parseFloat(document.getElementById('form-conversion').value) || 0,
+                conversion: conversion,
                 promotion: parseFloat(document.getElementById('form-promotion').value) || 0,
                 rebate: parseFloat(document.getElementById('form-rebate').value) || 0,
-                remark: document.getElementById('form-remark').value.trim(),
-                feedback: document.getElementById('form-feedback').value.trim(),
+                remark: document.getElementById('form-remark').value,
+                feedback: document.getElementById('form-feedback').value,
                 contributions: contributions
             };
 
             if (isFirebaseInitialized && db) {
-                db.collection("contracts").doc(String(nextId)).set(newContract).catch(()=>{});
-            }
-
-            if (idVal) {
-                const idx = contracts.findIndex(c => c.id === parseInt(idVal));
-                if (idx !== -1) contracts[idx] = newContract;
+                db.collection("contracts").doc(String(nextId)).set(newContract)
+                    .then(() => {
+                        closeContractModal();
+                        alert('✅ 실시간 데이터베이스에 저장되었습니다!');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('저장 실패: ' + err.message);
+                    });
             } else {
-                contracts.unshift(newContract);
+                if (idVal) {
+                    const idx = contracts.findIndex(c => c.id === parseInt(idVal));
+                    if (idx !== -1) contracts[idx] = newContract;
+                } else {
+                    contracts.unshift(newContract);
+                }
+                saveToLocalStorage();
+                closeContractModal();
+                initAllFilters();
+                renderDashboard();
+                renderTable();
+                renderMemberDetail();
+                alert('✅ 저장되었습니다 (로컬 모드)');
             }
-
-            saveToLocalStorage();
-            closeContractModal();
-            initAllFilters();
-            renderDashboard();
-            renderTable();
-            renderMemberDetail();
-            alert('✅ 계약 정보가 안전하게 저장되었습니다.');
         }
 
         function editContract(id) {
-            const c = contracts.find(x => x.id === id);
-            if (!c) return;
-            document.getElementById('modal-title').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> 계약 정보 수정 (No.${c.id})`;
-            document.getElementById('form-id').value = c.id;
-            document.getElementById('form-corp').value = c.corp || '';
-            document.getElementById('form-insured').value = c.insured || '';
-            document.getElementById('form-date').value = c.date || '';
-            document.getElementById('form-perf-year').value = getContractPerfYear(c);
-            document.getElementById('form-perf-month').value = String(parseInt(getContractPerfMonth(c), 10));
-            document.getElementById('form-category').value = c.category || '';
-            document.getElementById('form-product').value = c.product || '';
-            document.getElementById('form-premium').value = c.premium || 0;
-            document.getElementById('form-conversion').value = c.conversion || 0;
-            document.getElementById('form-promotion').value = c.promotion || 0;
-            document.getElementById('form-rebate').value = c.rebate || 0;
-            document.getElementById('form-remark').value = c.remark || '';
-            document.getElementById('form-feedback').value = c.feedback || '';
+            const contract = contracts.find(c => c.id === id);
+            if (!contract) return;
+
+            document.getElementById('modal-title').innerHTML = '<i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i> 계약 정보 수정 (No.' + contract.id + ')';
+            document.getElementById('form-id').value = contract.id;
+            document.getElementById('form-corp').value = contract.corp || '';
+            document.getElementById('form-insured').value = contract.insured || '';
+            document.getElementById('form-date').value = contract.date || '';
+
+            const pYear = getContractPerfYear(contract);
+            const pMonth = getContractPerfMonth(contract);
+            const ySelect = document.getElementById('form-perf-year');
+            const mSelect = document.getElementById('form-perf-month');
+            if (ySelect && [...ySelect.options].some(o => o.value === pYear)) {
+                ySelect.value = pYear;
+            }
+            if (mSelect) {
+                mSelect.value = String(parseInt(pMonth, 10));
+            }
+
+            document.getElementById('form-category').value = contract.category || '';
+            document.getElementById('form-product').value = contract.product || '';
+            document.getElementById('form-premium').value = contract.premium || 0;
+            document.getElementById('form-conversion').value = contract.conversion || 0;
+            document.getElementById('form-promotion').value = contract.promotion || 0;
+            document.getElementById('form-rebate').value = contract.rebate || 0;
+            document.getElementById('form-remark').value = contract.remark || '';
+            document.getElementById('form-feedback').value = contract.feedback || '';
 
             const list = document.getElementById('modal-contributions-list');
             list.innerHTML = '';
-            (c.contributions || []).forEach(con => addContributionRow(con.name, con.rate));
+            (contract.contributions || []).forEach(con => {
+                addContributionRow(con.name, con.rate);
+            });
+
             openContractModal(true);
         }
 
+        function deleteContract(id) {
+            if (confirm('정말로 No.' + id + ' 계약 정보를 삭제하시겠습니까?')) {
+                if (isFirebaseInitialized && db) {
+                    db.collection("contracts").doc(String(id)).delete()
+                        .then(() => alert('삭제되었습니다.'))
+                        .catch(err => alert('삭제 실패: ' + err.message));
+                } else {
+                    contracts = contracts.filter(c => c.id !== id);
+                    saveToLocalStorage();
+                    renderTable();
+                    renderDashboard();
+                    renderMemberDetail();
+                }
+            }
+        }
+
+        function triggerDataImport() {
+            const confirmImport = confirm("⚠️ 엑셀 파일의 데이터를 불러와 클라우드에 일괄 동기화하시겠습니까?");
+            if (confirmImport) {
+                document.getElementById('excel-file-input').click();
+            }
+        }
+
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+                    if (rows.length < 3) {
+                        alert('올바른 엑셀 양식이 아닙니다.');
+                        return;
+                    }
+
+                    let memberColsMap = {};
+                    let headerRow = rows[0];
+                    let foundMembers = [];
+
+                    for (let c = 10; c < headerRow.length; c += 2) {
+                        let mName = String(headerRow[c]).trim();
+                        if (mName && mName !== '비고' && mName !== '피드백') {
+                            foundMembers.push(mName);
+                            memberColsMap[mName] = { rateCol: c, amountCol: c + 1 };
+                        }
+                    }
+
+                    const importedContracts = [];
+                    for (let r = 2; r < rows.length; r++) {
+                        let row = rows[r];
+                        let corp = String(row[0] || '').trim();
+                        let insured = String(row[1] || '').trim();
+                        let month = String(row[2] || '').trim();
+                        let date = String(row[3] || '').trim();
+                        let category = String(row[4] || '').trim();
+                        let product = String(row[5] || '').trim();
+                        let premium = parseFloat(row[6]) || 0;
+                        let conversion = parseFloat(row[7]) || 0;
+                        let promotion = parseFloat(row[8]) || 0;
+                        let rebate = parseFloat(row[9]) || 0;
+
+                        if (!corp && !product && premium === 0) continue;
+
+                        let contributions = [];
+                        foundMembers.forEach(m => {
+                            let colInfo = memberColsMap[m];
+                            if (colInfo) {
+                                let rateVal = parseFloat(row[colInfo.rateCol]);
+                                let amountVal = parseFloat(row[colInfo.amountCol]);
+                                if (!isNaN(rateVal) && rateVal > 0) {
+                                    contributions.push({
+                                        name: m,
+                                        rate: rateVal <= 1 ? rateVal : rateVal / 100,
+                                        amount: !isNaN(amountVal) ? amountVal : Math.round(conversion * (rateVal <= 1 ? rateVal : rateVal / 100))
+                                    });
+                                }
+                            }
+                        });
+
+                        let remarkCol = 10 + (foundMembers.length * 2);
+                        let feedbackCol = remarkCol + 1;
+                        let remark = String(row[remarkCol] || '').trim();
+                        let feedback = String(row[feedbackCol] || '').trim();
+
+                        importedContracts.push({
+                            id: importedContracts.length + 1,
+                            corp: corp,
+                            insured: insured,
+                            month: month,
+                            date: date,
+                            category: category,
+                            product: product,
+                            premium: premium,
+                            conversion: conversion,
+                            promotion: promotion,
+                            rebate: rebate,
+                            contributions: contributions,
+                            remark: remark,
+                            feedback: feedback
+                        });
+                    }
+
+                    if (importedContracts.length === 0) {
+                        alert('가져올 수 있는 계약 데이터가 없습니다.');
+                        return;
+                    }
+
+                    if (isFirebaseInitialized && db) {
+                        const batch = db.batch();
+                        importedContracts.forEach(item => {
+                            const docRef = db.collection("contracts").doc(String(item.id));
+                            batch.set(docRef, item);
+                        });
+                        batch.commit().then(() => {
+                            alert('✅ 총 ' + importedContracts.length + '건이 클라우드에 성공적으로 동기화되었습니다!');
+                        }).catch(err => {
+                            alert('클라우드 동기화 실패: ' + err.message);
+                        });
+                    } else {
+                        contracts = importedContracts;
+                        saveToLocalStorage();
+                        initAllFilters();
+                        renderDashboard();
+                        renderTable();
+                        renderMemberDetail();
+                        alert('✅ 총 ' + contracts.length + '건의 데이터가 로컬에 저장되었습니다.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('파일을 처리하는 중 오류가 발생했습니다: ' + err.message);
+                } finally {
+                    e.target.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
         function exportToExcel(onlyFiltered = false) {
-            const targetContracts = onlyFiltered ? getFilteredContracts() : contracts.filter(isValidContract);
+            const targetContracts = onlyFiltered ? getFilteredContracts() : contracts;
             if (targetContracts.length === 0) {
                 alert('내보낼 데이터가 없습니다.');
                 return;
             }
+
             const knownMembers = getAllKnownMemberNames();
             const exportData = [];
             const headerRow1 = ['법인명', '피보험자', '업적반영연월', '계약일', '구분', '상품', '보험료', '환산', '시책', '리베이트'];
@@ -1653,30 +2012,48 @@
             knownMembers.forEach(() => { headerRow2.push('기여율', '환산'); });
             headerRow2.push('', '');
 
-            exportData.push(headerRow1, headerRow2);
+            exportData.push(headerRow1);
+            exportData.push(headerRow2);
 
             targetContracts.forEach(c => {
                 const pYear = getContractPerfYear(c);
                 const pMonth = getContractPerfMonth(c);
-                const perfStr = `${pYear}-${pMonth.padStart(2, '0')}`;
-                const row = [c.corp || '', c.insured || '', perfStr, c.date || '', c.category || '', c.product || '', c.premium || 0, c.conversion || 0, c.promotion || 0, c.rebate || 0];
+                const perfStr = pYear + '-' + (pMonth.length === 1 ? '0' + pMonth : pMonth);
+
+                const row = [
+                    c.corp || '',
+                    c.insured || '',
+                    perfStr,
+                    c.date || '',
+                    c.category || '',
+                    c.product || '',
+                    c.premium || 0,
+                    c.conversion || 0,
+                    c.promotion || 0,
+                    c.rebate || 0
+                ];
+
                 knownMembers.forEach(m => {
                     const contrib = (c.contributions || []).find(con => con.name === m);
                     if (contrib) {
-                        const r = contrib.rate <= 1 ? contrib.rate : contrib.rate / 100;
-                        row.push(r, contrib.amount || (c.conversion * r));
+                        const rateVal = contrib.rate <= 1 ? contrib.rate : contrib.rate / 100;
+                        const amtVal = contrib.amount || (c.conversion * rateVal);
+                        row.push(rateVal, amtVal);
                     } else {
                         row.push('', '');
                     }
                 });
+
                 row.push(c.remark || '', c.feedback || '');
                 exportData.push(row);
             });
 
             const ws = XLSX.utils.aoa_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "공동모집이력");
-            XLSX.writeFile(wb, `최강1팀_공동모집_${new Date().toISOString().slice(0,10)}.xlsx`);
+            const sheetName = onlyFiltered ? "조회결과_공동모집" : "전체_공동모집이력";
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            const fileName = onlyFiltered ? '공동모집_조회결과_' + new Date().toISOString().slice(0,10) + '.xlsx' : '최강1팀_공동모집_이력관리_전체_' + new Date().toISOString().slice(0,10) + '.xlsx';
+            XLSX.writeFile(wb, fileName);
         }
 
         function exportMemberReport() {
@@ -1760,65 +2137,35 @@
             XLSX.writeFile(wb, memberName + '_기여율보고서_' + new Date().toISOString().slice(0,10) + '.xlsx');
         }
 
-        function triggerDataImport() {
-            if (confirm("엑셀 파일의 데이터를 불러와 동기화하시겠습니까?")) {
-                document.getElementById('excel-file-input').click();
-            }
+        // Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
         }
 
-        function handleFileImport(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-
-                    const imported = [];
-                    for (let r = 2; r < rows.length; r++) {
-                        const row = rows[r];
-                        const corp = String(row[0] || '').trim();
-                        const product = String(row[5] || '').trim();
-                        if (!corp || product === '월별환산환계') continue;
-
-                        imported.push({
-                            id: imported.length + 1,
-                            corp: corp,
-                            insured: String(row[1] || '').trim(),
-                            month: String(row[2] || '').trim(),
-                            date: String(row[3] || '').trim(),
-                            category: String(row[4] || '').trim(),
-                            product: product,
-                            premium: parseFloat(row[6]) || 0,
-                            conversion: parseFloat(row[7]) || 0,
-                            promotion: parseFloat(row[8]) || 0,
-                            rebate: parseFloat(row[9]) || 0,
-                            contributions: [],
-                            remark: String(row[10] || '').trim(),
-                            feedback: String(row[11] || '').trim()
-                        });
-                    }
-
-                    if (imported.length > 0) {
-                        contracts = imported;
-                        saveToLocalStorage();
-                        initAllFilters();
-                        renderDashboard();
-                        renderTable();
-                        alert(`✅ 총 ${contracts.length}건이 성공적으로 로드되었습니다.`);
-                    }
-                } catch(err) {
-                    alert('파일 처리 오류: ' + err.message);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) installBtn.classList.remove('hidden');
+        });
 
         function promptPWAInstall() {
-            alert('스마트폰 브라우저 메뉴(⋮ 또는 공유버튼)에서 "홈 화면에 추가" 또는 "앱 설치"를 선택해주세요!');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted PWA prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('스마트폰 브라우저 메뉴(⋮ 또는 공유버튼)에서 "홈 화면에 추가" 또는 "앱 설치"를 선택해주세요!');
+            }
         }
 
         startApplication();
