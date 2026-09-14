@@ -329,26 +329,24 @@
                     </button>
                 </div>
 
+                <!-- KPI Metric Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-slate-100">
                     <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200">
                         <span class="text-xs text-slate-500 font-semibold">참여 계약 건수</span>
                         <h4 id="mem-kpi-count" class="text-xl sm:text-2xl font-bold text-slate-800 mt-1">0 건</h4>
                     </div>
 
-                    <div class="bg-blue-50/40 p-3.5 sm:p-4 rounded-xl border border-blue-200">
-                        <div class="text-xs font-semibold flex items-center gap-1 flex-wrap">
-                            <span class="text-blue-600 font-bold">팀원 배분 환산액</span>
-                            <span class="text-slate-400">/</span>
-                            <span class="text-slate-800 font-bold">계약 총 환산액</span>
+                    <div class="bg-blue-50/50 p-3.5 sm:p-4 rounded-xl border border-blue-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-blue-700 font-semibold">계약 총환산액 / 팀원 배분환산</span>
                         </div>
-                        <div class="mt-1 flex items-baseline gap-1.5 flex-wrap">
-                            <span id="mem-kpi-my-conv" class="text-lg sm:text-xl font-extrabold text-blue-600">0 원</span>
-                            <span class="text-slate-400 font-medium text-sm">/</span>
-                            <span id="mem-kpi-total-conv" class="text-lg sm:text-xl font-extrabold text-slate-900">0 원</span>
+                        <div class="mt-1">
+                            <h4 id="mem-kpi-conversion-main" class="text-lg sm:text-xl font-bold text-blue-700">0 원</h4>
+                            <p id="mem-kpi-total-conv-sub" class="text-[11px] text-slate-500 mt-0.5">계약 총환산 합계: 0 원</p>
                         </div>
                     </div>
 
-                    <div class="bg-emerald-50/40 p-3.5 sm:p-4 rounded-xl border border-emerald-200">
+                    <div class="bg-emerald-50/50 p-3.5 sm:p-4 rounded-xl border border-emerald-200">
                         <span class="text-xs text-emerald-700 font-semibold">평균 기여율 (실제 기여 비중)</span>
                         <h4 id="mem-kpi-avg-rate" class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">0.0%</h4>
                         <p class="text-[11px] text-slate-400 mt-0.5">배분환산 ÷ 계약총환산 기준</p>
@@ -417,7 +415,7 @@
                         <i data-lucide="list" class="w-4 h-4 text-blue-600"></i> 팀원 명단 및 재직 차월 현황
                     </span>
                     <span class="text-[11px] text-slate-400 leading-relaxed">
-                        * 차월은 입사월을 기준으로 현재 시점까지 경과된 개월 수가 자동 카운트됩니다.
+                        * 재직 중인 팀원이 차월수 높은 순서대로 상단에 노출되며, 비활성(퇴사/해촉 등) 팀원은 하단에 배치됩니다.
                     </span>
                 </div>
 
@@ -605,6 +603,26 @@
                     <p class="text-[10px] text-slate-400 mt-1">* 입사월 기준으로 현재까지의 재직 개월 수(차월)가 자동 계산됩니다.</p>
                 </div>
 
+                <!-- 비활성화 설정 -->
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="mem-form-inactive" onchange="toggleInactiveReasonField()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                            <span>비활성 팀원으로 설정</span>
+                        </label>
+                        <span class="text-[10px] text-slate-400">체크 시 신규 계약 등록 목록에서 제외</span>
+                    </div>
+
+                    <div id="inactive-reason-group" class="hidden pt-1.5 border-t border-slate-200 flex items-center gap-2">
+                        <label class="text-slate-600 font-semibold whitespace-nowrap">비활성 사유:</label>
+                        <select id="mem-form-reason" class="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-xs font-medium focus:ring-2 focus:ring-blue-500 flex-1">
+                            <option value="퇴사">퇴사</option>
+                            <option value="해촉">해촉</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
                     <button type="button" onclick="closeMemberModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium">취소</button>
                     <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-sm transition">저장하기</button>
@@ -639,22 +657,22 @@
         }
 
         const DEFAULT_MEMBERS = [
-            {"id": "m_leader", "name": "사업부장님", "empId": "M001", "joinMonth": "2020-01", "birthDate": "", "active": true},
-            {"id": "m_1", "name": "전현수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_2", "name": "정형도", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_3", "name": "홍종보", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_4", "name": "맹주석", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_5", "name": "권상헌", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_6", "name": "김상우", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_7", "name": "김정미", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_8", "name": "김은경", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_9", "name": "김경호", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_10", "name": "송준범", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_11", "name": "김기만", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_12", "name": "김희태", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_13", "name": "고은영", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_14", "name": "신남수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
-            {"id": "m_15", "name": "이다운", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true}
+            {"id": "m_leader", "name": "사업부장님", "empId": "M001", "joinMonth": "2020-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_1", "name": "전현수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_2", "name": "정형도", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_3", "name": "홍종보", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_4", "name": "맹주석", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_5", "name": "권상헌", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_6", "name": "김상우", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_7", "name": "김정미", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_8", "name": "김은경", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_9", "name": "김경호", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_10", "name": "송준범", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_11", "name": "김기만", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_12", "name": "김희태", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_13", "name": "고은영", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_14", "name": "신남수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"},
+            {"id": "m_15", "name": "이다운", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true, "statusReason": "재직중"}
         ];
 
         let contracts = [];
@@ -670,9 +688,9 @@
             const dateStrA = String(a.date || '').replace(/[^0-9]/g, '');
             const dateStrB = String(b.date || '').replace(/[^0-9]/g, '');
             if (dateStrA !== dateStrB) {
-                return dateStrB.localeCompare(dateStrA); // 최신 날짜가 맨 위
+                return dateStrB.localeCompare(dateStrA); // 최신 계약일자가 상단
             }
-            return (b.id || 0) - (a.id || 0); // 날짜 동일 시 최신 등록(id) 순
+            return (b.id || 0) - (a.id || 0);
         }
 
         function updateSyncStatus(status, text) {
@@ -690,24 +708,90 @@
             }
         }
 
-        function calculateTenureMonths(joinMonthStr) {
-            if (!joinMonthStr) return '-';
+        // 숫자 차월값 반환 (정렬용)
+        function getTenureValue(joinMonthStr) {
+            if (!joinMonthStr) return -9999;
             const parts = String(joinMonthStr).split('-');
             const jYear = parseInt(parts[0], 10);
             const jMonth = parseInt(parts[1], 10);
-            if (isNaN(jYear) || isNaN(jMonth)) return '-';
-            
+            if (isNaN(jYear) || isNaN(jMonth)) return -9999;
             const now = new Date();
             const curYear = now.getFullYear();
             const curMonth = now.getMonth() + 1;
-            
-            const diff = (curYear - jYear) * 12 + (curMonth - jMonth) + 1;
-            return diff > 0 ? (diff + '차월') : '1차월';
+            return (curYear - jYear) * 12 + (curMonth - jMonth) + 1;
         }
 
+        function calculateTenureMonths(joinMonthStr) {
+            const val = getTenureValue(joinMonthStr);
+            if (val === -9999) return '-';
+            return val > 0 ? (val + '차월') : '1차월';
+        }
+
+        // 계약 등록 시 사용되는 재직(활성) 팀원 목록 (차월 높은 순 정렬)
         function getActiveMemberNames() {
-            const activeList = teamMembersList.filter(m => m.active !== false).map(m => m.name);
-            return activeList.length > 0 ? activeList : DEFAULT_MEMBERS.map(m => m.name);
+            const activeMembers = teamMembersList.filter(m => m.active !== false);
+            const sorted = [...activeMembers].sort((a, b) => {
+                if (a.name === '사업부장님') return -1;
+                if (b.name === '사업부장님') return 1;
+                const tenureDiff = getTenureValue(b.joinMonth) - getTenureValue(a.joinMonth);
+                if (tenureDiff !== 0) return tenureDiff;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+            return sorted.map(m => m.name);
+        }
+
+        // [핵심 1] 팀원별 실적조회 드롭다운용 정렬 목록 생성
+        // 사업부장님 우선 -> 재직자 차월 높은순 -> 비활성 팀원(퇴사, 해촉 등) 하단 배치
+        function getSortedMembersForPerformanceSelect() {
+            const activeList = [];
+            const inactiveList = [];
+            const processedNames = new Set();
+
+            // 팀원 관리 목록에 등록된 팀원 분류
+            teamMembersList.forEach(m => {
+                processedNames.add(m.name);
+                if (m.active !== false) {
+                    activeList.push(m);
+                } else {
+                    inactiveList.push(m);
+                }
+            });
+
+            // 과거 계약에는 남아있으나 팀원 관리 목록에서 지워진 기타 이름들
+            contracts.forEach(c => {
+                (c.contributions || []).forEach(con => {
+                    if (con.name && !processedNames.has(con.name)) {
+                        processedNames.add(con.name);
+                        inactiveList.push({
+                            id: 'legacy_' + con.name,
+                            name: con.name,
+                            active: false,
+                            statusReason: '과거이력',
+                            joinMonth: ''
+                        });
+                    }
+                });
+            });
+
+            // 재직자 정렬: 사업부장님 맨 위 -> 차월 높은 순(내림차순) -> 이름 가나다순
+            activeList.sort((a, b) => {
+                if (a.name === '사업부장님') return -1;
+                if (b.name === '사업부장님') return 1;
+                const tenureA = getTenureValue(a.joinMonth);
+                const tenureB = getTenureValue(b.joinMonth);
+                if (tenureB !== tenureA) return tenureB - tenureA;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            // 비활성자 정렬: 차월 높은 순 -> 이름 가나다순
+            inactiveList.sort((a, b) => {
+                const tenureA = getTenureValue(a.joinMonth);
+                const tenureB = getTenureValue(b.joinMonth);
+                if (tenureB !== tenureA) return tenureB - tenureA;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            return { activeList, inactiveList };
         }
 
         function getAllKnownMemberNames() {
@@ -773,7 +857,6 @@
             return months.sort((a,b) => Number(a) - Number(b));
         }
 
-        // ================= [핵심] Firebase 수신 및 로드 시 계약일자 최신순 정렬 =================
         function startApplication() {
             try {
                 loadTeamMembersFromStorage();
@@ -793,7 +876,6 @@
                         });
 
                         if (loadedContracts.length > 0) {
-                            // 날짜 숫자 정규화 후 최신 계약일자(date) 우선 정렬
                             loadedContracts.sort(compareContractsByDateDesc);
                             contracts = loadedContracts;
                             saveToLocalStorage();
@@ -905,6 +987,16 @@
             if (window.lucide && lucide.createIcons) lucide.createIcons();
         }
 
+        function toggleInactiveReasonField() {
+            const isInactive = document.getElementById('mem-form-inactive').checked;
+            const group = document.getElementById('inactive-reason-group');
+            if (isInactive) {
+                group.classList.remove('hidden');
+            } else {
+                group.classList.add('hidden');
+            }
+        }
+
         function openMemberModal(isEdit = false, memberId = null) {
             document.getElementById('member-modal').classList.remove('hidden');
             const titleEl = document.getElementById('member-modal-title');
@@ -919,6 +1011,9 @@
                 const curY = now.getFullYear();
                 const curM = String(now.getMonth() + 1).padStart(2, '0');
                 document.getElementById('mem-form-join').value = curY + '-' + curM;
+                document.getElementById('mem-form-inactive').checked = false;
+                document.getElementById('mem-form-reason').value = '퇴사';
+                toggleInactiveReasonField();
                 updateMemberModalTenurePreview();
             } else {
                 titleEl.innerHTML = '<i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i> 팀원 정보 수정';
@@ -929,6 +1024,10 @@
                     document.getElementById('mem-form-empid').value = member.empId || '';
                     document.getElementById('mem-form-birth').value = member.birthDate || '';
                     document.getElementById('mem-form-join').value = member.joinMonth || '';
+                    const isInactive = member.active === false;
+                    document.getElementById('mem-form-inactive').checked = isInactive;
+                    document.getElementById('mem-form-reason').value = member.statusReason || '퇴사';
+                    toggleInactiveReasonField();
                     updateMemberModalTenurePreview();
                 }
             }
@@ -954,6 +1053,8 @@
             const empId = document.getElementById('mem-form-empid').value.trim();
             const birthDate = document.getElementById('mem-form-birth').value;
             const joinMonth = document.getElementById('mem-form-join').value;
+            const isInactive = document.getElementById('mem-form-inactive').checked;
+            const statusReason = isInactive ? document.getElementById('mem-form-reason').value : '재직중';
 
             if (!name) {
                 alert('팀원 이름을 입력해주세요.');
@@ -967,7 +1068,8 @@
                 empId: empId,
                 birthDate: birthDate,
                 joinMonth: joinMonth,
-                active: true
+                active: !isInactive,
+                statusReason: statusReason
             };
 
             if (isFirebaseInitialized && db) {
@@ -1007,29 +1109,27 @@
 
             const contractCount = contracts.filter(c => (c.contributions || []).some(con => con.name === member.name)).length;
             const msg = contractCount > 0 
-                ? '⚠️ [' + member.name + '] 팀원은 총 ' + contractCount + '건의 공동모집 업적 이력이 있습니다.\n\n팀원을 삭제하더라도 기존 계약에 등록된 기여율 및 정산 내역은 안전하게 보존됩니다.\n정말로 삭제(비활성화)하시겠습니까?'
-                : '정말로 [' + member.name + '] 팀원 정보를 삭제하시겠습니까?';
+                ? '⚠️ [' + member.name + '] 팀원은 총 ' + contractCount + '건의 공동모집 업적 이력이 있습니다.\n\n팀원 명단에서 완전히 삭제하시겠습니까?\n(기존 체결된 계약 데이터 내 기여율은 안전하게 유지됩니다)'
+                : '정말로 [' + member.name + '] 팀원 정보를 명단에서 완전히 삭제하시겠습니까?';
 
             if (!confirm(msg)) return;
 
             if (isFirebaseInitialized && db) {
-                db.collection("team_members").doc(String(memberId)).update({ active: false })
-                    .then(() => alert('팀원 정보가 삭제(비활성화)되었습니다. 기존 계약 이력은 보존됩니다.'))
+                db.collection("team_members").doc(String(memberId)).delete()
+                    .then(() => alert('팀원 정보가 완전히 삭제되었습니다.'))
                     .catch(err => alert('삭제 처리 오류: ' + err.message));
             } else {
-                const idx = teamMembersList.findIndex(m => String(m.id) === String(memberId));
-                if (idx !== -1) {
-                    teamMembersList[idx].active = false;
-                }
+                teamMembersList = teamMembersList.filter(m => String(m.id) !== String(memberId));
                 saveTeamMembersToStorage();
                 initAllFilters();
                 renderMemberSelect();
                 renderMemberMgmtTable();
                 renderDashboard();
-                alert('팀원 정보가 삭제(비활성화)되었습니다.');
+                alert('팀원 정보가 완전히 삭제되었습니다.');
             }
         }
 
+        // [핵심 2] 팀원 관리 화면: 재직중인 사람은 차월수 높은 순서대로 상단, 비활성 팀원은 하단 배치
         function renderMemberMgmtTable() {
             const tbody = document.getElementById('member-mgmt-table-body');
             const countBadge = document.getElementById('member-mgmt-count-badge');
@@ -1043,7 +1143,26 @@
                 return;
             }
 
-            tbody.innerHTML = teamMembersList.map((m, idx) => {
+            const sortedList = [...teamMembersList].sort((a, b) => {
+                // 사업부장님 최상단 고정
+                if (a.name === '사업부장님') return -1;
+                if (b.name === '사업부장님') return 1;
+
+                const aActive = a.active !== false ? 1 : 0;
+                const bActive = b.active !== false ? 1 : 0;
+                
+                // 1순위: 재직중(active=1)인 사람 우선
+                if (aActive !== bActive) return bActive - aActive;
+
+                // 2순위: 재직중/비활성 그룹 내부에서 각각 차월수가 높은 순(내림차순) 정렬
+                const tenureDiff = getTenureValue(b.joinMonth) - getTenureValue(a.joinMonth);
+                if (tenureDiff !== 0) return tenureDiff;
+
+                // 3순위: 차월이 같으면 이름순
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            tbody.innerHTML = sortedList.map((m, idx) => {
                 const isLeader = m.name === '사업부장님';
                 const isActive = m.active !== false;
                 const tenure = calculateTenureMonths(m.joinMonth);
@@ -1051,11 +1170,19 @@
                 const birthDisplay = m.birthDate || '-';
                 const empIdDisplay = m.empId || '-';
 
-                const statusBadge = isActive
-                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">재직중</span>'
-                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">퇴사/비활성</span>';
+                let statusBadge = '';
+                if (isActive) {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">재직중</span>';
+                } else {
+                    const reason = m.statusReason || '비활성';
+                    let badgeColor = 'bg-slate-100 text-slate-600';
+                    if (reason === '퇴사') badgeColor = 'bg-slate-200 text-slate-700';
+                    else if (reason === '해촉') badgeColor = 'bg-amber-100 text-amber-800';
+                    else if (reason === '기타') badgeColor = 'bg-purple-100 text-purple-800';
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + badgeColor + '">' + reason + '</span>';
+                }
 
-                return '<tr class="hover:bg-slate-50 transition border-b border-slate-100 ' + (!isActive ? 'opacity-50 bg-slate-50/50' : '') + '">' +
+                return '<tr class="hover:bg-slate-50 transition border-b border-slate-100 ' + (!isActive ? 'bg-slate-50/70 opacity-60' : '') + '">' +
                     '<td class="py-3 px-4 text-center text-slate-400 font-mono">' + (idx + 1) + '</td>' +
                     '<td class="py-3 px-4 font-bold text-slate-800 flex items-center gap-1.5">' +
                         m.name + (isLeader ? ' <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">리더</span>' : '') +
@@ -1068,7 +1195,7 @@
                     '<td class="py-3 px-4 text-center whitespace-nowrap">' +
                         '<div class="flex items-center justify-center gap-1">' +
                             '<button onclick="openMemberModal(true, \'' + m.id + '\')" class="p-1.5 hover:bg-blue-100 text-blue-600 rounded-md transition" title="수정"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>' +
-                            (!isLeader && isActive ? '<button onclick="deleteMember(\'' + m.id + '\')" class="p-1.5 hover:bg-rose-100 text-rose-600 rounded-md transition" title="삭제"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
+                            (!isLeader ? '<button onclick="deleteMember(\'' + m.id + '\')" class="p-1.5 hover:bg-rose-100 text-rose-600 rounded-md transition" title="완전 삭제"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
                         '</div>' +
                     '</td>' +
                 '</tr>';
@@ -1426,7 +1553,7 @@
             }
         }
 
-        // ================= [계약 관리/조회] 계약일자(date) 내림차순 정렬 =================
+        // [계약 관리/조회] 계약일자 내림차순 정렬
         function getFilteredContracts() {
             const searchInput = document.getElementById('filter-search');
             const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -1450,7 +1577,6 @@
                 return true;
             });
 
-            // 👈 최신 계약일자(date) 우선 정렬 (날짜 정규화 적용)
             return filtered.sort(compareContractsByDateDesc);
         }
 
@@ -1544,25 +1670,50 @@
         function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
         function nextPage() { currentPage++; renderTable(); }
 
+        // [핵심 1 적용] 팀원별 실적조회 드롭다운 렌더링 (차월 높은 순, 비활성 하단 배치)
         function renderMemberSelect() {
             const select = document.getElementById('member-select');
-            const memberNames = getAllKnownMemberNames();
-            if (select) {
-                const prev = select.value;
-                select.innerHTML = memberNames.map(m => '<option value="' + m + '">' + m + '</option>').join('');
-                if (prev && memberNames.includes(prev)) select.value = prev;
+            if (!select) return;
+
+            const prev = select.value;
+            const { activeList, inactiveList } = getSortedMembersForPerformanceSelect();
+
+            let html = '';
+            // 1. 재직 팀원 (차월수 높은 순)
+            activeList.forEach(m => {
+                const tenure = calculateTenureMonths(m.joinMonth);
+                const label = m.name === '사업부장님' ? m.name : `${m.name} (${tenure})`;
+                html += `<option value="${m.name}">${label}</option>`;
+            });
+
+            // 2. 비활성 팀원 구분선 및 하단 배치
+            if (inactiveList.length > 0) {
+                html += `<option disabled class="bg-slate-200 text-slate-500 font-bold">────────── 비활성(퇴사/해촉) ──────────</option>`;
+                inactiveList.forEach(m => {
+                    const reason = m.statusReason || '비활성';
+                    html += `<option value="${m.name}" class="text-slate-500">${m.name} (${reason})</option>`;
+                });
             }
+
+            select.innerHTML = html;
+
+            const allNames = [...activeList.map(m=>m.name), ...inactiveList.map(m=>m.name)];
+            if (prev && allNames.includes(prev)) {
+                select.value = prev;
+            } else if (activeList.length > 0) {
+                select.value = activeList[0].name;
+            }
+
             renderMemberDetail();
         }
 
-        // ================= [팀원별 기여계약 상세내역] 계약일자(date) 내림차순 정렬 =================
+        // [팀원별 기여계약 상세내역]
         function renderMemberDetail() {
             const memSelect = document.getElementById('member-select');
             const memberName = memSelect ? memSelect.value : '사업부장님';
             const periodSelect = document.getElementById('member-period-select');
             const periodVal = periodSelect ? periodSelect.value : 'ALL';
 
-            // 최신 계약일자(date) 우선 정렬 (날짜 정규화 적용)
             const relevant = contracts.filter(c => {
                 if (!matchesPeriod(c, periodVal)) return false;
                 return (c.contributions || []).some(con => con.name === memberName);
@@ -1625,13 +1776,13 @@
             const actualAvgRate = sumTotalContractConv > 0 ? ((sumMemberConv / sumTotalContractConv) * 100).toFixed(1) : '0.0';
 
             const mCount = document.getElementById('mem-kpi-count');
-            const mMyConv = document.getElementById('mem-kpi-my-conv');
-            const mTotConv = document.getElementById('mem-kpi-total-conv');
+            const mConvMain = document.getElementById('mem-kpi-conversion-main');
+            const mTotSub = document.getElementById('mem-kpi-total-conv-sub');
             const mAvgRate = document.getElementById('mem-kpi-avg-rate');
 
             if (mCount) mCount.innerText = relevant.length + ' 건';
-            if (mMyConv) mMyConv.innerText = Math.round(sumMemberConv).toLocaleString() + ' 원';
-            if (mTotConv) mTotConv.innerText = Math.round(sumTotalContractConv).toLocaleString() + ' 원';
+            if (mConvMain) mConvMain.innerText = Math.round(sumMemberConv).toLocaleString() + ' 원';
+            if (mTotSub) mTotSub.innerText = '계약 총환산 합계: ' + Math.round(sumTotalContractConv).toLocaleString() + ' 원';
             if (mAvgRate) mAvgRate.innerText = actualAvgRate + '%';
         }
 
