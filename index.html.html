@@ -665,6 +665,16 @@
         let chartCategory = null;
         let chartMembers = null;
 
+        // 공통 계약일자 정규화 및 내림차순 정렬 헬퍼 함수
+        function compareContractsByDateDesc(a, b) {
+            const dateStrA = String(a.date || '').replace(/[^0-9]/g, '');
+            const dateStrB = String(b.date || '').replace(/[^0-9]/g, '');
+            if (dateStrA !== dateStrB) {
+                return dateStrB.localeCompare(dateStrA); // 최신 날짜가 맨 위
+            }
+            return (b.id || 0) - (a.id || 0); // 날짜 동일 시 최신 등록(id) 순
+        }
+
         function updateSyncStatus(status, text) {
             const badge = document.getElementById('sync-badge');
             if (!badge) return;
@@ -763,7 +773,7 @@
             return months.sort((a,b) => Number(a) - Number(b));
         }
 
-        // ================= [핵심] Firebase 수신 시 계약일자(date) 내림차순 정렬 =================
+        // ================= [핵심] Firebase 수신 및 로드 시 계약일자 최신순 정렬 =================
         function startApplication() {
             try {
                 loadTeamMembersFromStorage();
@@ -783,13 +793,8 @@
                         });
 
                         if (loadedContracts.length > 0) {
-                            // 👈 Firebase 수신 시 계약일자(date) 최신순(내림차순) 정렬 강제 적용
-                            loadedContracts.sort((a, b) => {
-                                const dateA = a.date || '';
-                                const dateB = b.date || '';
-                                if (dateA !== dateB) return dateB.localeCompare(dateA);
-                                return (b.id || 0) - (a.id || 0);
-                            });
+                            // 날짜 숫자 정규화 후 최신 계약일자(date) 우선 정렬
+                            loadedContracts.sort(compareContractsByDateDesc);
                             contracts = loadedContracts;
                             saveToLocalStorage();
                         }
@@ -861,12 +866,7 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        parsed.sort((a, b) => {
-                            const dateA = a.date || '';
-                            const dateB = b.date || '';
-                            if (dateA !== dateB) return dateB.localeCompare(dateA);
-                            return (b.id || 0) - (a.id || 0);
-                        });
+                        parsed.sort(compareContractsByDateDesc);
                         contracts = parsed;
                         return;
                     }
@@ -1450,13 +1450,8 @@
                 return true;
             });
 
-            // 👈 최신 계약일자(date) 우선 정렬
-            return filtered.sort((a, b) => {
-                const dateA = a.date || '';
-                const dateB = b.date || '';
-                if (dateA !== dateB) return dateB.localeCompare(dateA);
-                return (b.id || 0) - (a.id || 0);
-            });
+            // 👈 최신 계약일자(date) 우선 정렬 (날짜 정규화 적용)
+            return filtered.sort(compareContractsByDateDesc);
         }
 
         function formatPromotionDisplay(p) {
@@ -1567,16 +1562,11 @@
             const periodSelect = document.getElementById('member-period-select');
             const periodVal = periodSelect ? periodSelect.value : 'ALL';
 
-            // 👈 최신 계약일자(date) 우선 정렬
+            // 최신 계약일자(date) 우선 정렬 (날짜 정규화 적용)
             const relevant = contracts.filter(c => {
                 if (!matchesPeriod(c, periodVal)) return false;
                 return (c.contributions || []).some(con => con.name === memberName);
-            }).sort((a, b) => {
-                const dateA = a.date || '';
-                const dateB = b.date || '';
-                if (dateA !== dateB) return dateB.localeCompare(dateA); // 9월 11일이 9월 10일보다 위로 정렬
-                return (b.id || 0) - (a.id || 0);
-            });
+            }).sort(compareContractsByDateDesc);
 
             let sumTotalContractConv = 0;
             let sumMemberConv = 0;
@@ -1805,6 +1795,7 @@
                 } else {
                     contracts.unshift(newContract);
                 }
+                contracts.sort(compareContractsByDateDesc);
                 saveToLocalStorage();
                 closeContractModal();
                 initAllFilters();
@@ -1967,6 +1958,8 @@
                         return;
                     }
 
+                    importedContracts.sort(compareContractsByDateDesc);
+
                     if (isFirebaseInitialized && db) {
                         const batch = db.batch();
                         importedContracts.forEach(item => {
@@ -2067,7 +2060,7 @@
             const relevant = contracts.filter(c => {
                 if (!matchesPeriod(c, periodVal)) return false;
                 return (c.contributions || []).some(con => con.name === memberName);
-            });
+            }).sort(compareContractsByDateDesc);
 
             if (relevant.length === 0) {
                 alert('해당 조건에 해당하는 내역이 없습니다.');
