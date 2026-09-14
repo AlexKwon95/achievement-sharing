@@ -264,10 +264,10 @@
                         <button onclick="openContractModal()" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition">
                             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 계약 등록
                         </button>
-                        <button onclick="exportToExcel(true)" class="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition">
+                        <button onclick="exportToExcel(true)" class="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition" title="현재 필터 및 검색된 결과만 엑셀로 저장합니다">
                             <i data-lucide="filter" class="w-3.5 h-3.5"></i> 조회결과 엑셀다운로드
                         </button>
-                        <button onclick="exportToExcel(false)" class="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition">
+                        <button onclick="exportToExcel(false)" class="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition" title="전체 원본 데이터를 엑셀로 저장합니다">
                             <i data-lucide="download" class="w-3.5 h-3.5"></i> 전체 엑셀다운로드
                         </button>
                     </div>
@@ -356,6 +356,7 @@
                 </div>
             </div>
 
+            <!-- 기여 계약 상세 내역 카드 -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-3.5 sm:p-4 border-b border-slate-200 flex justify-between items-center">
                     <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
@@ -637,7 +638,6 @@
             console.warn("Firebase 초기화 알림:", e);
         }
 
-        // Default Initial Team Members Structure
         const DEFAULT_MEMBERS = [
             {"id": "m_leader", "name": "사업부장님", "empId": "M001", "joinMonth": "2020-01", "birthDate": "", "active": true},
             {"id": "m_1", "name": "전현수", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true},
@@ -657,7 +657,6 @@
             {"id": "m_15", "name": "이다운", "empId": "", "joinMonth": "2024-01", "birthDate": "", "active": true}
         ];
 
-        // Application State
         let contracts = [];
         let teamMembersList = [];
         let currentPage = 1;
@@ -665,6 +664,16 @@
         let chartMonthly = null;
         let chartCategory = null;
         let chartMembers = null;
+
+        // 공통 계약일자 정규화 및 내림차순 정렬 헬퍼 함수
+        function compareContractsByDateDesc(a, b) {
+            const dateStrA = String(a.date || '').replace(/[^0-9]/g, '');
+            const dateStrB = String(b.date || '').replace(/[^0-9]/g, '');
+            if (dateStrA !== dateStrB) {
+                return dateStrB.localeCompare(dateStrA); // 최신 날짜가 맨 위
+            }
+            return (b.id || 0) - (a.id || 0); // 날짜 동일 시 최신 등록(id) 순
+        }
 
         function updateSyncStatus(status, text) {
             const badge = document.getElementById('sync-badge');
@@ -764,6 +773,7 @@
             return months.sort((a,b) => Number(a) - Number(b));
         }
 
+        // ================= [핵심] Firebase 수신 및 로드 시 계약일자 최신순 정렬 =================
         function startApplication() {
             try {
                 loadTeamMembersFromStorage();
@@ -783,15 +793,8 @@
                         });
 
                         if (loadedContracts.length > 0) {
-                            // 계약일자(date) 최신순(내림차순) 정렬
-                            loadedContracts.sort((a, b) => {
-                                const dateA = a.date || '';
-                                const dateB = b.date || '';
-                                if (dateA !== dateB) {
-                                    return dateB.localeCompare(dateA);
-                                }
-                                return (b.id || 0) - (a.id || 0);
-                            });
+                            // 날짜 숫자 정규화 후 최신 계약일자(date) 우선 정렬
+                            loadedContracts.sort(compareContractsByDateDesc);
                             contracts = loadedContracts;
                             saveToLocalStorage();
                         }
@@ -863,13 +866,7 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        // 계약일자 최신순 정렬
-                        parsed.sort((a, b) => {
-                            const dateA = a.date || '';
-                            const dateB = b.date || '';
-                            if (dateA !== dateB) return dateB.localeCompare(dateA);
-                            return (b.id || 0) - (a.id || 0);
-                        });
+                        parsed.sort(compareContractsByDateDesc);
                         contracts = parsed;
                         return;
                     }
@@ -1429,7 +1426,7 @@
             }
         }
 
-        // ================= [수정 완료] 계약일자(date) 최신순 내림차순 정렬 =================
+        // ================= [계약 관리/조회] 계약일자(date) 내림차순 정렬 =================
         function getFilteredContracts() {
             const searchInput = document.getElementById('filter-search');
             const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -1453,15 +1450,8 @@
                 return true;
             });
 
-            // 계약일자(date) 최신순(내림차순) 정렬, 동일 일자일 경우 ID 내림차순
-            return filtered.sort((a, b) => {
-                const dateA = a.date || '';
-                const dateB = b.date || '';
-                if (dateA !== dateB) {
-                    return dateB.localeCompare(dateA);
-                }
-                return (b.id || 0) - (a.id || 0);
-            });
+            // 👈 최신 계약일자(date) 우선 정렬 (날짜 정규화 적용)
+            return filtered.sort(compareContractsByDateDesc);
         }
 
         function formatPromotionDisplay(p) {
@@ -1565,16 +1555,18 @@
             renderMemberDetail();
         }
 
+        // ================= [팀원별 기여계약 상세내역] 계약일자(date) 내림차순 정렬 =================
         function renderMemberDetail() {
             const memSelect = document.getElementById('member-select');
             const memberName = memSelect ? memSelect.value : '사업부장님';
             const periodSelect = document.getElementById('member-period-select');
             const periodVal = periodSelect ? periodSelect.value : 'ALL';
 
+            // 최신 계약일자(date) 우선 정렬 (날짜 정규화 적용)
             const relevant = contracts.filter(c => {
                 if (!matchesPeriod(c, periodVal)) return false;
                 return (c.contributions || []).some(con => con.name === memberName);
-            });
+            }).sort(compareContractsByDateDesc);
 
             let sumTotalContractConv = 0;
             let sumMemberConv = 0;
@@ -1803,6 +1795,7 @@
                 } else {
                     contracts.unshift(newContract);
                 }
+                contracts.sort(compareContractsByDateDesc);
                 saveToLocalStorage();
                 closeContractModal();
                 initAllFilters();
@@ -1965,6 +1958,8 @@
                         return;
                     }
 
+                    importedContracts.sort(compareContractsByDateDesc);
+
                     if (isFirebaseInitialized && db) {
                         const batch = db.batch();
                         importedContracts.forEach(item => {
@@ -2065,7 +2060,7 @@
             const relevant = contracts.filter(c => {
                 if (!matchesPeriod(c, periodVal)) return false;
                 return (c.contributions || []).some(con => con.name === memberName);
-            });
+            }).sort(compareContractsByDateDesc);
 
             if (relevant.length === 0) {
                 alert('해당 조건에 해당하는 내역이 없습니다.');
