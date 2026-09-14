@@ -1582,7 +1582,7 @@
             return Math.round(r).toLocaleString() + '만원';
         }
 
-        // [핵심 1 해결] No 번호를 최신 체결일 기준으로 1번부터 차례대로 매기기
+        // [No 순번 최신순 반영]
         function renderTable() {
             const filtered = getFilteredContracts();
             const countEl = document.getElementById('table-total-count');
@@ -1609,7 +1609,6 @@
             }
 
             tbody.innerHTML = pageData.map((c, idx) => {
-                // 👈 최신 계약일자가 맨 위(1번)가 되도록 순번 부여
                 const rowNo = start + idx + 1;
                 const pYear = getContractPerfYear(c);
                 const pMonth = getContractPerfMonth(c);
@@ -2275,11 +2274,14 @@
             XLSX.writeFile(wb, memberName + '_기여율보고서_' + new Date().toISOString().slice(0,10) + '.xlsx');
         }
 
-        // Service Worker for PWA
+        // Service Worker for PWA (v=3 버전을 명시하여 구버전 캐시 강제 갱신)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+                navigator.serviceWorker.register('./sw.js?v=3')
+                    .then(reg => {
+                        reg.update(); // 변경 감지 시 즉시 백그라운드 갱신
+                        console.log('PWA Service Worker registered:', reg.scope);
+                    })
                     .catch(err => console.log('Service Worker registration failed:', err));
             });
         }
